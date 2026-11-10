@@ -1,5 +1,11 @@
 # Finance Customer Segmentation & RFM Intelligence
 
+[![Live Web App](https://img.shields.io/badge/Live_Dashboard-GitHub_Pages-teal?style=for-the-badge&logo=github)](https://jaeyun0507.github.io/finance-customer-segmentation/)
+[![Python 3.14](https://img.shields.io/badge/Python-3.14-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Model-K--Means_Clustering-orange?style=for-the-badge&logo=scikitlearn)](https://scikit-learn.org/)
+
+> **Live Web App:** [https://jaeyun0507.github.io/finance-customer-segmentation/](https://jaeyun0507.github.io/finance-customer-segmentation/)
+
 > **AI Hub 금융상품·서비스 및 소비자 특성 데이터(SN 71938)** 기반 고객 거래 행동 분석, RFM 피처 엔지니어링, K-Means 군집화 및 비즈니스 의사결정 지원 대화형 웹 대시보드
 
 ---
@@ -174,3 +180,4 @@ finance-customer-segmentation/
    ```
 3. **데이터 보호 준수:**
    * AI-Hub 이용 정책에 따라 원본 데이터(`data/raw/`) 및 개인별 마트(`data/processed/`)는 `.gitignore`를 통해 Git 추적에서 제외되어 외부 노출이 철저히 차단됩니다.
+
