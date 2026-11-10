@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>FinSegment - 금융 고객 세분화 인텔리전스</title>
+  <title>FinSegment | Institutional Customer Intelligence</title>
   
-  <!-- PWA & iOS App Meta Tags -->
+  <!-- PWA & Apple Web App Meta -->
   <link rel="manifest" href="./manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FinSegment">
   <link rel="apple-touch-icon" href="./icon.svg">
   <link rel="icon" type="image/svg+xml" href="./icon.svg">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0B0C10">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Typography: Pretendard & Inter for elite finance UI -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  
+  <!-- Tailwind CSS & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <script>
     tailwind.config = {
@@ -26,12 +28,25 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              400: '#2dd4bf',
-              500: '#14b8a6',
-              600: '#0d9488',
-              900: '#134e4a'
+            surface: {
+              DEFAULT: '#0B0C10',
+              subtle: '#12141A',
+              card: '#161922',
+              hover: '#1D212D',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderStrong: 'rgba(255, 255, 255, 0.14)'
+            },
+            accent: {
+              emerald: '#10B981',
+              emeraldMuted: 'rgba(16, 185, 129, 0.12)',
+              amber: '#F59E0B',
+              rose: '#F43F5E',
+              indigo: '#6366F1'
             }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'sans-serif'],
+            mono: ['SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace']
           }
         }
       }
@@ -39,520 +54,695 @@
   </script>
 
   <style>
-    /* iOS Safe Area Support */
+    /* Institutional Finance Typography & Hairline Polish */
     :root {
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
-      --sal: env(safe-area-inset-left, 0px);
-      --sar: env(safe-area-inset-right, 0px);
     }
     body {
       padding-top: var(--sat);
-      padding-bottom: calc(var(--sab) + 4rem);
-      padding-left: var(--sal);
-      padding-right: var(--sar);
-      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Segoe UI", sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      padding-bottom: calc(var(--sab) + 4.5rem);
+      font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     @media (min-width: 768px) {
-      body {
-        padding-bottom: var(--sab);
-      }
+      body { padding-bottom: var(--sab); }
     }
-    /* Hide scrollbars on mobile */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .tab-active { color: #2dd4bf !important; }
-    .tab-active-bg { background-color: rgba(20, 184, 166, 0.15) !important; color: #2dd4bf !important; border-color: rgba(20, 184, 166, 0.4) !important; }
-    .card-glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.6); }
-    .card-glass:hover { border-color: rgba(45, 212, 191, 0.4); transition: border-color 0.2s ease; }
+    .tnum {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+    }
+    .hairline-border {
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .hairline-bottom {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .hairline-top {
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    /* Subtle custom scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
+    /* Nav active state */
+    .nav-active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.18) !important;
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="bg-[#090A0F] text-slate-200 min-h-screen selection:bg-emerald-500/30 selection:text-emerald-200">
 
-  <!-- Desktop & Tablet Top Navigation Header -->
-  <header class="card-glass border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <img src="./icon.svg" alt="FinSegment Logo" class="w-9 h-9 rounded-xl shadow-md">
+  <!-- Top Enterprise Navigation Header -->
+  <header class="sticky top-0 z-40 bg-[#090A0F]/90 backdrop-blur-md hairline-bottom px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1400px] mx-auto h-16 flex items-center justify-between">
+      
+      <!-- Logo & Institutional Context -->
+      <div class="flex items-center space-x-3.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 hairline-border flex items-center justify-center shadow-inner">
+          <i class="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+        </div>
         <div>
           <div class="flex items-center space-x-2">
-            <span class="font-extrabold text-base sm:text-lg text-white tracking-tight">FinSegment</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30 font-mono">v1.2 PWA</span>
+            <span class="font-bold text-sm tracking-tight text-white">FinSegment</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.05] text-slate-300 hairline-border">INTELLIGENCE</span>
           </div>
-          <p class="text-[11px] text-slate-400 hidden sm:block">AI Hub 금융데이터 기반 RFM & K-Means 고객 인텔리전스</p>
+          <p class="text-[11px] text-slate-400 hidden sm:block">AI Hub 금융상품·소비자 특성 데이터 기반 K-Means 의사결정 엔진</p>
         </div>
       </div>
 
-      <!-- Desktop Tab Menu -->
-      <nav class="hidden md:flex items-center space-x-1">
-        <button onclick="switchTab('overview')" id="nav-btn-overview" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition tab-active-bg border border-transparent">
-          <i class="fa-solid fa-chart-pie mr-1.5"></i>대시보드 개요
+      <!-- Segmented Tab Switcher (Stripe / Linear Style) -->
+      <nav class="hidden md:flex items-center bg-[#13151D] p-1 rounded-lg hairline-border space-x-0.5 text-xs font-medium">
+        <button onclick="switchView('overview')" id="nav-btn-overview" class="px-3.5 py-1.5 rounded-md text-slate-400 hover:text-white transition nav-active hairline-border">
+          대시보드 개요
         </button>
-        <button onclick="switchTab('clusters')" id="nav-btn-clusters" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
-          <i class="fa-solid fa-users-viewfinder mr-1.5"></i>4대 군집 탐색
+        <button onclick="switchView('matrix')" id="nav-btn-matrix" class="px-3.5 py-1.5 rounded-md text-slate-400 hover:text-white transition border border-transparent">
+          세그먼트 매트릭스
         </button>
-        <button onclick="switchTab('strategy')" id="nav-btn-strategy" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
-          <i class="fa-solid fa-bullseye mr-1.5"></i>CRM 마케팅 전략
+        <button onclick="switchView('strategy')" id="nav-btn-strategy" class="px-3.5 py-1.5 rounded-md text-slate-400 hover:text-white transition border border-transparent">
+          CRM 액션 큐
         </button>
-        <button onclick="switchTab('simulator')" id="nav-btn-simulator" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
-          <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>AI 세그먼트 시뮬레이터
+        <button onclick="switchView('sandbox')" id="nav-btn-sandbox" class="px-3.5 py-1.5 rounded-md text-slate-400 hover:text-white transition border border-transparent">
+          AI 시뮬레이션
         </button>
       </nav>
 
-      <!-- App Status Badge -->
-      <div class="flex items-center space-x-2">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-          K=4 최적화
-        </span>
-        <a href="https://github.com/JaeYun0507/finance-customer-segmentation" target="_blank" class="text-slate-400 hover:text-white text-base p-1.5" title="GitHub Repository">
-          <i class="fa-brands fa-github"></i>
+      <!-- Institutional Status & Meta -->
+      <div class="flex items-center space-x-3 text-xs">
+        <div class="hidden lg:flex items-center space-x-2 text-slate-400 font-mono text-[11px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>N=335,506</span>
+          <span class="text-slate-600">/</span>
+          <span>K=4 OPTIMAL</span>
+        </div>
+        <a href="https://github.com/JaeYun0507/finance-customer-segmentation" target="_blank" 
+           class="px-2.5 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white hairline-border flex items-center space-x-1.5 transition text-xs">
+          <i class="fa-brands fa-github text-xs"></i>
+          <span class="hidden sm:inline font-medium">저장소</span>
         </a>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Views Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+  <!-- Main Body Content -->
+  <main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <!-- VIEW 1: OVERVIEW -->
-    <div id="view-overview" class="space-y-6">
-      <!-- 4 Top KPI Cards (Mobile swipeable row / Desktop 4-grid) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <!-- The "Verdict" Executive KPI Strip -->
+    <section>
+      <div class="flex items-baseline justify-between mb-3">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Executive Summary · AUM & Portfolio Position</h2>
+        <span class="text-xs text-slate-400 font-mono">기준일: 2025-12-31 Snapshot</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         <!-- KPI 1 -->
-        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] font-semibold tracking-wider">총 분석 고객</span>
-            <i class="fa-solid fa-users text-blue-400 text-sm"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>총 식별 고객 모수</span>
+            <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">100% 식별</span>
           </div>
-          <div class="mt-2 sm:mt-3">
-            <div class="text-lg sm:text-2xl font-black text-white" id="kpi-total-cust">335,506명</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">원천 거래 385,019건</div>
+          <div class="mt-2.5 flex items-baseline space-x-2">
+            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white tnum">335,506</span>
+            <span class="text-xs text-slate-400 font-medium">명</span>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400 flex items-center space-x-1.5">
+            <span>원천 거래 385,019건</span>
+            <span class="text-slate-600">·</span>
+            <span>중복 결제 배제</span>
           </div>
         </div>
 
         <!-- KPI 2 -->
-        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] font-semibold tracking-wider">평균 누적 거래액</span>
-            <i class="fa-solid fa-won-sign text-emerald-400 text-sm"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>고객 평균 기여 금액</span>
+            <span class="text-[11px] font-mono text-slate-400 bg-white/[0.05] px-1.5 py-0.5 rounded">AUM Index</span>
           </div>
-          <div class="mt-2 sm:mt-3">
-            <div class="text-lg sm:text-2xl font-black text-emerald-400">6,246만 원</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">중앙값: 1,000만 원</div>
+          <div class="mt-2.5 flex items-baseline space-x-2">
+            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white tnum">6,246</span>
+            <span class="text-xs text-slate-400 font-medium">만 원</span>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400 flex items-center space-x-1.5">
+            <span>중위값 1,000만 원</span>
+            <span class="text-slate-600">·</span>
+            <span class="text-emerald-400 font-medium">최대 160억 원</span>
           </div>
         </div>
 
         <!-- KPI 3 -->
-        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] font-semibold tracking-wider">VIP 충성 고객</span>
-            <i class="fa-solid fa-crown text-purple-400 text-sm"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>최우량 충성 자산가 (VIP)</span>
+            <span class="text-[11px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">Tier 1</span>
           </div>
-          <div class="mt-2 sm:mt-3">
-            <div class="text-lg sm:text-2xl font-black text-purple-400">41,815명 (12.5%)</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">다회 거래율 100%</div>
+          <div class="mt-2.5 flex items-baseline space-x-2">
+            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-purple-300 tnum">41,815</span>
+            <span class="text-xs text-slate-400 font-medium">명 (12.5%)</span>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400 flex items-center space-x-1.5">
+            <span>다회 거래율 100%</span>
+            <span class="text-slate-600">·</span>
+            <span class="text-purple-300">평균 1.55억 원</span>
           </div>
         </div>
 
         <!-- KPI 4 -->
-        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="text-[11px] font-semibold tracking-wider">이탈 징후 고액군</span>
-            <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-4 sm:p-5">
+          <div class="flex items-center justify-between text-slate-400 text-xs">
+            <span>이탈 징후 고액 자산 (Dormant)</span>
+            <span class="text-[11px] font-mono text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded">P1 Action</span>
           </div>
-          <div class="mt-2 sm:mt-3">
-            <div class="text-lg sm:text-2xl font-black text-rose-400">26,914명 (8.0%)</div>
-            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">평균 미거래 6.4년</div>
+          <div class="mt-2.5 flex items-baseline space-x-2">
+            <span class="text-2xl sm:text-3xl font-extrabold tracking-tight text-rose-400 tnum">26,914</span>
+            <span class="text-xs text-slate-400 font-medium">명 (8.0%)</span>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400 flex items-center space-x-1.5">
+            <span>평균 미거래 6.4년</span>
+            <span class="text-slate-600">·</span>
+            <span class="text-rose-300 font-medium">방어 AUM 약 4조</span>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- Charts Section (iPad 2-col / Mobile 1-col) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <!-- Doughnut: Cluster Share -->
-        <div class="card-glass rounded-2xl p-5 flex flex-col justify-between">
+    <!-- VIEW 1: OVERVIEW & MASTER CHARTS -->
+    <div id="view-overview" class="space-y-6">
+      
+      <!-- Primary Data Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Chart 1: Donut Distribution (4 cols) -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 lg:col-span-4 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-bold text-white">4대 세그먼트 점유율</h2>
-              <span class="text-[10px] text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">K-Means</span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Segment Composition</h3>
+              <span class="text-[11px] font-mono text-slate-400">Total 100%</span>
             </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">고객수 기준 비중 (33.5만 명)</p>
+            <p class="text-xs text-slate-300 font-medium mt-1">4대 고객 세그먼트 인원 점유율</p>
           </div>
-          <div class="relative my-3 h-52 sm:h-60 flex items-center justify-center">
+
+          <div class="relative my-4 h-56 flex items-center justify-center">
             <canvas id="chart-share"></canvas>
           </div>
-          <div class="text-[10px] text-center text-slate-400">탭/클릭 시 세부 군집 지표를 확인하세요</div>
+
+          <div class="hairline-top pt-3 space-y-1.5 text-xs">
+            <div class="flex justify-between items-center text-slate-300">
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-purple-500 mr-2"></span>VIP 다빈도 충성</span>
+              <span class="font-mono tnum font-semibold">12.5%</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-300">
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-cyan-500 mr-2"></span>신규 유입 소액 보험</span>
+              <span class="font-mono tnum font-semibold">23.2%</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-300">
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500 mr-2"></span>고액 이탈 징후</span>
+              <span class="font-mono tnum font-semibold">8.0%</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-300">
+              <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>증권 단발 중위 자산</span>
+              <span class="font-mono tnum font-semibold">56.3%</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Bar/Line: Monetary vs Frequency -->
-        <div class="card-glass rounded-2xl p-5 lg:col-span-2 flex flex-col justify-between">
+        <!-- Chart 2: Dual Axis Monetary & Frequency (8 cols) -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 lg:col-span-8 flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-bold text-white">거래 규모(Monetary) & 충성도(Frequency) 비교</h2>
-              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">RFM Matrix</span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">RFM Financial Leverage Comparison</h3>
+              <span class="text-[11px] font-mono text-slate-400">Dual-Axis Analysis</span>
             </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">평균 거래액(만 원) 및 2회 이상 다회 거래 경험자 비율(%)</p>
+            <p class="text-xs text-slate-300 font-medium mt-1">군집별 평균 기여 금액(만 원) & 다회 거래 비율(%)</p>
           </div>
-          <div class="relative my-3 h-52 sm:h-60">
+
+          <div class="relative my-4 h-64">
             <canvas id="chart-comparison"></canvas>
           </div>
-          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800">
-            <span><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-500 mr-1"></span>평균 거래액</span>
-            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500 mr-1"></span>다회 거래율</span>
+
+          <div class="hairline-top pt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+            <div class="flex items-center space-x-4">
+              <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500 mr-1.5"></span>평균 누적 거래액 (단위: 만 원)</span>
+              <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 mr-1.5"></span>다회 거래 경험자 비율 (%)</span>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400">K-Means Normalized Features</span>
           </div>
         </div>
       </div>
 
-      <!-- Additional Diagnostics (Elbow & Tenure) -->
+      <!-- Secondary Row: Evaluation & Sector Breakdown -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="card-glass rounded-2xl p-5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white">K-Means 적합도 곡선 (K=2~6)</h2>
-            <i class="fa-solid fa-chart-line text-slate-500"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Clustering Fit & Validation</h3>
+            <span class="text-[11px] font-mono text-emerald-400">K=4 Elbow Optimum</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">엘보우 기법(Inertia) & 실루엣 계수(0.3476) 비교</p>
-          <div class="relative my-3 h-48">
+          <p class="text-xs text-slate-300 font-medium">Inertia (WCSS) & Silhouette Score (실루엣 계수)</p>
+          <div class="relative my-4 h-48">
             <canvas id="chart-evaluation"></canvas>
           </div>
         </div>
 
-        <div class="card-glass rounded-2xl p-5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-bold text-white">금융 업종 및 고객 관계 연수</h2>
-            <i class="fa-solid fa-building-columns text-slate-500"></i>
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5">
+          <div class="flex items-center justify-between mb-1">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Domain Exposure & Tenure</h3>
+            <span class="text-[11px] font-mono text-slate-400">Securities vs Insurance</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">증권 vs 보험 비율 및 평균 관계 유지 연수(Tenure)</p>
-          <div class="relative my-3 h-48">
+          <p class="text-xs text-slate-300 font-medium">증권 비중(%) 및 최초 거래 이후 관계 유지 연수(년)</p>
+          <div class="relative my-4 h-48">
             <canvas id="chart-tenure-sector"></canvas>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- VIEW 2: CLUSTERS EXPLORER -->
-    <div id="view-clusters" class="hidden space-y-6">
-      <div>
-        <h2 class="text-lg font-bold text-white">4대 고객 세그먼트 심층 탐색</h2>
-        <p class="text-xs text-slate-400">데이터로 입증된 4가지 금융 소비자 행동 패턴과 인구통계학적 특성입니다.</p>
+    <!-- VIEW 2: THE WORKHORSE SEGMENT MATRIX -->
+    <div id="view-matrix" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-bold text-white tracking-tight">4대 고객 세그먼트 마스터 매트릭스</h2>
+          <p class="text-xs text-slate-400">정밀 군집화로 분류된 335,506명 전수 데이터의 정량적 행동 프로필입니다.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-slate-400">행 클릭 시 세부 프로필 전환</span>
+        </div>
       </div>
 
-      <!-- Cluster Filter Pills -->
-      <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
-        <button onclick="filterCluster('all')" id="pill-all" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-teal-500 text-slate-950">전체보기 (4개)</button>
-        <button onclick="filterCluster(0)" id="pill-0" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C0: VIP 충성</button>
-        <button onclick="filterCluster(1)" id="pill-1" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C1: 신규 보험</button>
-        <button onclick="filterCluster(2)" id="pill-2" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C2: 이탈 징후</button>
-        <button onclick="filterCluster(3)" id="pill-3" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C3: 증권 단발</button>
-      </div>
-
-      <!-- Detailed Cluster Cards Container -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="clusters-cards-grid">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
-
-    <!-- VIEW 3: CRM MARKETING STRATEGY -->
-    <div id="view-strategy" class="hidden space-y-6">
-      <div>
-        <h2 class="text-lg font-bold text-white">데이터 기반 CRM 마케팅 전략 플레이북</h2>
-        <p class="text-xs text-slate-400">각 세그먼트의 LTV(고객 생애 가치) 극대화 및 이탈 방지를 위한 실무 가이드</p>
-      </div>
-
-      <!-- Strategy Table Matrix -->
-      <div class="card-glass rounded-2xl p-5 overflow-hidden">
-        <h3 class="text-sm font-bold text-teal-400 mb-3 flex items-center">
-          <i class="fa-solid fa-table-cells mr-2"></i>군집별 타겟 마케팅 매트릭스
-        </h3>
+      <!-- Stripe-Style Data Table -->
+      <div class="bg-[#12141C] hairline-border rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-900/80 text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="p-3">군집 페르소나</th>
-                <th class="p-3">주요 특징</th>
-                <th class="p-3">마케팅 목표</th>
-                <th class="p-3">추천 금융 상품</th>
-                <th class="p-3">핵심 실행 액션</th>
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-[#0D0E14] text-slate-400 hairline-bottom text-[11px] font-mono tracking-wider uppercase">
+                <th class="py-3 px-4 font-medium">Segment Identity</th>
+                <th class="py-3 px-4 font-medium">Tier</th>
+                <th class="py-3 px-4 font-medium text-right">Headcount (%)</th>
+                <th class="py-3 px-4 font-medium text-right">Mean Transacted</th>
+                <th class="py-3 px-4 font-medium text-right">Repeat Rate</th>
+                <th class="py-3 px-4 font-medium text-right">Recency (Inact.)</th>
+                <th class="py-3 px-4 font-medium text-right">Tenure</th>
+                <th class="py-3 px-4 font-medium">Domain Exposure</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800 text-slate-200">
-              <tr class="hover:bg-slate-900/40">
-                <td class="p-3 font-bold text-purple-400">Cluster 0<br><span class="text-[11px] font-normal text-slate-300">VIP 다빈도 충성</span></td>
-                <td class="p-3">다회거래 100%, 평균 1.55억, 14년 관계</td>
-                <td class="p-3 text-emerald-400 font-semibold">LTV 극대화 & 락인</td>
-                <td class="p-3">글로벌 랩어카운트, 고액 신탁</td>
-                <td class="p-3">1:1 전담 PB 매칭, 프리미엄 세무/승계 컨설팅</td>
-              </tr>
-              <tr class="hover:bg-slate-900/40">
-                <td class="p-3 font-bold text-cyan-400">Cluster 1<br><span class="text-[11px] font-normal text-slate-300">신규 소액 보험</span></td>
-                <td class="p-3">1년차 신규, 보험 92%, 평균 247만</td>
-                <td class="p-3 text-cyan-400 font-semibold">증권 교차 유치 (Cross-sell)</td>
-                <td class="p-3">소액 적립식 펀드, 청년 ISA</td>
-                <td class="p-3">모바일 헬스케어 리포트, 첫 거래 리워드 쿠폰</td>
-              </tr>
-              <tr class="hover:bg-slate-900/40">
-                <td class="p-3 font-bold text-rose-400">Cluster 2<br><span class="text-[11px] font-normal text-slate-300">고액 자산가 이탈징후</span></td>
-                <td class="p-3">6.4년 미거래, 최고소득층, 평균 1.50억</td>
-                <td class="p-3 text-rose-400 font-semibold">최우선 윈백 (Win-back)</td>
-                <td class="p-3">단기 고금리 RP, 특판 채권</td>
-                <td class="p-3">휴면 자산 리밸런싱 세미나 초대, 우대 수수료</td>
-              </tr>
-              <tr class="hover:bg-slate-900/40">
-                <td class="p-3 font-bold text-blue-400">Cluster 3<br><span class="text-[11px] font-normal text-slate-300">증권 단발 중위</span></td>
-                <td class="p-3">56% 최대볼륨, 단발성, 평균 5,404만</td>
-                <td class="p-3 text-blue-400 font-semibold">다회 거래 전환 (Habitual)</td>
-                <td class="p-3">적립식 펀드/ETF, 연금저축</td>
-                <td class="p-3">적립식 자동이체 챌린지, 절세 세액공제 알림</td>
-              </tr>
+            <tbody class="divide-y divide-white/[0.05] text-slate-200" id="matrix-table-body">
+              <!-- Rendered via JS with tabular precision -->
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Action Plan Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="card-glass rounded-2xl p-5 border-l-4 border-l-purple-500">
-          <h4 class="font-bold text-sm text-purple-300 mb-2">💎 VIP Retention Playbook (Cluster 0)</h4>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            상위 12.5%의 고객이 전체 자산의 상당 부분을 형성하고 있습니다. 전담 PB와의 주기적 분기 리밸런싱 미팅을 정례화하고, 비과세 혜택이 적용되는 해외 분산투자 랩 상품을 번들링하여 자산 이탈을 사전 방지합니다.
-          </p>
-        </div>
-        <div class="card-glass rounded-2xl p-5 border-l-4 border-l-rose-500">
-          <h4 class="font-bold text-sm text-rose-300 mb-2">🚨 High-Risk Win-back Campaign (Cluster 2)</h4>
-          <p class="text-xs text-slate-300 leading-relaxed">
-            최근 6년 이상 추가 거래가 없는 2.6만 명의 고액 자산가는 경쟁사 이탈 가능성이 매우 높습니다. '내 잠자는 자산 깨우기' 맞춤형 포트폴리오 리포트 발송과 한시적 특판 RP 금리 제공으로 활성 계좌로 재전환시킵니다.
-          </p>
-        </div>
+      <!-- Segment Detail Deep-Dive Card (Dynamic) -->
+      <div class="bg-[#12141C] hairline-border rounded-xl p-6" id="segment-detail-card">
+        <!-- Rendered via JS when row clicked -->
       </div>
     </div>
 
-    <!-- VIEW 4: AI SEGMENT SIMULATOR -->
-    <div id="view-simulator" class="hidden space-y-6">
-      <div>
-        <h2 class="text-lg font-bold text-white">AI 고객 세그먼트 판정 시뮬레이터</h2>
-        <p class="text-xs text-slate-400">신규 고객 또는 특정 타겟의 재무/거래 조건을 입력하면 4대 군집 모델이 실시간으로 분류합니다.</p>
+    <!-- VIEW 3: CRM MARKETING ACTION QUEUE (Ramp Style) -->
+    <div id="view-strategy" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-bold text-white tracking-tight">CRM 액션 큐 & LTV 최적화 플레이북</h2>
+          <p class="text-xs text-slate-400">데이터 기반 비즈니스 임팩트 순으로 정렬된 분기별 핵심 과업 리스트</p>
+        </div>
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 font-mono text-[11px]">P1: 이탈 방어 긴급</span>
+          <span class="px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-mono text-[11px]">P2: VIP LTV 락인</span>
+        </div>
+      </div>
+
+      <!-- Action Work Queue Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- P1 Queue -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 border-l-2 border-l-rose-500 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono text-[10px] font-bold">PRIORITY 1 · URGENT</span>
+            <span class="text-xs font-mono text-slate-400">Target: 26,914명</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">고액 자산가 이탈 방어 및 긴급 윈백 (Win-Back)</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+              평균 1.5억 원의 자산을 거래한 최고소득층 고객이 최근 6.4년간 추가 거래 없이 멈춰 있습니다. 경쟁 금융사로의 자산 이탈 위험이 가장 높은 최우선 방어군입니다.
+            </p>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border space-y-2 text-xs">
+            <div class="font-semibold text-slate-200">실행 오퍼레이션:</div>
+            <ul class="space-y-1.5 text-slate-400 list-disc list-inside text-[11px]">
+              <li>'미청구 자산 및 숨은 배당금 점검 리포트' 전용 알림톡 발송</li>
+              <li>단기 고금리 특판 RP 및 안정형 채권 우선 매수 한도 배정</li>
+              <li>복귀 거래 시 향후 1년간 온라인 주식/펀드 매매 수수료 전액 면제</li>
+            </ul>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-2 hairline-top">
+            <span>예상 방어 대상 AUM:</span>
+            <span class="font-bold text-white font-mono text-sm">약 4조 400억 원</span>
+          </div>
+        </div>
+
+        <!-- P2 Queue -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 border-l-2 border-l-purple-500 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-mono text-[10px] font-bold">PRIORITY 2 · HIGH VALUE</span>
+            <span class="text-xs font-mono text-slate-400">Target: 41,815명</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">VIP 다빈도 충성 고객 LTV 극대화 & 교차판매</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+              평균 거래 2.13회, 14년 이상 연속 거래를 유지한 최우량 핵심 고객층입니다. 증권 거래에 편중된 포트폴리오를 고액 신탁 및 변액보험으로 교차 확장합니다.
+            </p>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border space-y-2 text-xs">
+            <div class="font-semibold text-slate-200">실행 오퍼레이션:</div>
+            <ul class="space-y-1.5 text-slate-400 list-disc list-inside text-[11px]">
+              <li>전담 PB 매칭을 통한 글로벌 분산투자 랩어카운트 우선 편입</li>
+              <li>상속·증여 및 법인 가업승계 특화 무료 세무 컨설팅 제공</li>
+              <li>퇴직연금(IRP) 및 고액 연금저축 펀드 패키지 크로스셀링</li>
+            </ul>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-2 hairline-top">
+            <span>관리 핵심 AUM 규모:</span>
+            <span class="font-bold text-white font-mono text-sm">약 6조 5,100억 원</span>
+          </div>
+        </div>
+
+        <!-- P3 Queue -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 border-l-2 border-l-blue-500 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono text-[10px] font-bold">PRIORITY 3 · VOLUME GROWTH</span>
+            <span class="text-xs font-mono text-slate-400">Target: 188,935명 (56.3%)</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">주력 볼륨 단발 고객의 2차 적립식 거래 전환</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+              과반수 이상의 고객이 1회 정액 거래 후 10년 넘게 계좌를 보유 중입니다. 단발성 매매를 정기 적립식 투자로 체질 개선하여 경상 수수료 수익을 창출합니다.
+            </p>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border space-y-2 text-xs">
+            <div class="font-semibold text-slate-200">실행 오퍼레이션:</div>
+            <ul class="space-y-1.5 text-slate-400 list-disc list-inside text-[11px]">
+              <li>월 10만 원 이상 ETF/펀드 자동적립 챌린지 (목표 달성 시 캐시백)</li>
+              <li>연말정산 세액공제 한도 부족분 자동 계산 및 연금저축 알림</li>
+              <li>AI 모델 기반 맞춤형 자산 배분 리밸런싱 푸시 발송</li>
+            </ul>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-2 hairline-top">
+            <span>다회 거래 전환 목표:</span>
+            <span class="font-bold text-white font-mono text-sm">신규 반복고객 3만 명 창출</span>
+          </div>
+        </div>
+
+        <!-- P4 Queue -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 border-l-2 border-l-cyan-500 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-mono text-[10px] font-bold">PRIORITY 4 · ONBOARDING</span>
+            <span class="text-xs font-mono text-slate-400">Target: 77,842명</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">신규 소액 보험 고객의 종합 금융 계좌 육성</h3>
+            <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+              최근 1년 이내에 유입된 소액 보험(평균 247만 원) 가입자입니다. 92%가 보험에 국한되어 있으므로 증권 종합계좌 및 ISA로의 온보딩을 가속화합니다.
+            </p>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border space-y-2 text-xs">
+            <div class="font-semibold text-slate-200">실행 오퍼레이션:</div>
+            <ul class="space-y-1.5 text-slate-400 list-disc list-inside text-[11px]">
+              <li>모바일 앱 전용 보장 분석 진단 리포트 및 질병 위험도 알림</li>
+              <li>첫 증권 위탁계좌 개설 시 미국 소수점 주식 1만 원 증정 프로모션</li>
+              <li>청년·사회초년생 맞춤형 비과세 ISA 계좌 연계 추천</li>
+            </ul>
+          </div>
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-2 hairline-top">
+            <span>증권 교차 가입 목표:</span>
+            <span class="font-bold text-white font-mono text-sm">가입률 8% → 25% 상향</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VIEW 4: SIMULATION SANDBOX (Bloomberg Style) -->
+    <div id="view-sandbox" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-base font-bold text-white tracking-tight">K-Means 세그먼트 분류 시뮬레이션 샌드박스</h2>
+          <p class="text-xs text-slate-400">신규 고객의 거래 파라미터를 입력하거나 프리셋 시나리오를 적용하여 판정 결과를 확인하세요.</p>
+        </div>
+        <!-- Scenario Presets -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto text-xs">
+          <span class="text-slate-400 text-[11px] mr-1 hidden sm:inline">프리셋:</span>
+          <button onclick="applyPreset('dormant')" class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] text-rose-300 hairline-border font-medium text-[11px]">고액 이탈</button>
+          <button onclick="applyPreset('vip')" class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] text-purple-300 hairline-border font-medium text-[11px]">VIP 충성</button>
+          <button onclick="applyPreset('insurance')" class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] text-cyan-300 hairline-border font-medium text-[11px]">신규 보험</button>
+          <button onclick="applyPreset('core')" class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] text-blue-300 hairline-border font-medium text-[11px]">증권 단발</button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Input Form (7 cols) -->
-        <div class="card-glass rounded-2xl p-6 lg:col-span-7 space-y-5">
-          <h3 class="text-sm font-bold text-teal-400 flex items-center">
-            <i class="fa-solid fa-sliders mr-2"></i>고객 속성 입력 파라미터
-          </h3>
+        
+        <!-- Controls Column (7 cols) -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 sm:p-6 lg:col-span-7 space-y-5">
+          <div class="flex items-center justify-between hairline-bottom pb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Parameter Controls</span>
+            <span class="text-[11px] font-mono text-emerald-400">Live Client Scoring</span>
+          </div>
 
-          <!-- Param 1: Monetary Amount -->
+          <!-- Slider 1: Monetary -->
           <div>
-            <div class="flex justify-between text-xs mb-1.5">
-              <span class="text-slate-300 font-semibold">거래 기여 금액 (Monetary)</span>
-              <span class="text-emerald-400 font-bold" id="sim-val-monetary">3,000만 원</span>
+            <div class="flex justify-between items-baseline text-xs mb-1.5">
+              <span class="text-slate-300 font-medium">거래 기여 금액 (Monetary)</span>
+              <span class="text-emerald-400 font-bold font-mono text-sm tnum" id="sim-disp-monetary">3,000만 원</span>
             </div>
-            <input type="range" min="100" max="30000" step="100" value="3000" id="sim-input-monetary" oninput="runSimulator()"
-              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-              <span>100만 원</span>
-              <span>1억 원</span>
-              <span>3억 원 이상</span>
+            <input type="range" min="100" max="30000" step="100" value="3000" id="sim-ctrl-monetary" oninput="calculateSimulation()"
+                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+              <span>100만</span>
+              <span>5,000만</span>
+              <span>1억</span>
+              <span>3억+</span>
             </div>
           </div>
 
-          <!-- Param 2: Frequency -->
+          <!-- Slider 2: Frequency -->
           <div>
-            <div class="flex justify-between text-xs mb-1.5">
-              <span class="text-slate-300 font-semibold">누적 거래 횟수 (Frequency)</span>
-              <span class="text-orange-400 font-bold" id="sim-val-frequency">1회 (단발)</span>
+            <div class="flex justify-between items-baseline text-xs mb-1.5">
+              <span class="text-slate-300 font-medium">누적 거래 횟수 (Frequency)</span>
+              <span class="text-amber-400 font-bold font-mono text-sm tnum" id="sim-disp-frequency">1회 (단발)</span>
             </div>
-            <input type="range" min="1" max="5" step="1" value="1" id="sim-input-frequency" oninput="runSimulator()"
-              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-orange-500">
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+            <input type="range" min="1" max="5" step="1" value="1" id="sim-ctrl-frequency" oninput="calculateSimulation()"
+                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500">
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
               <span>1회</span>
-              <span>2회</span>
+              <span>2회 (다회)</span>
               <span>3회</span>
               <span>4회</span>
-              <span>5회 이상</span>
+              <span>5회+</span>
             </div>
           </div>
 
-          <!-- Param 3: Recency (Years inactive) -->
+          <!-- Slider 3: Recency -->
           <div>
-            <div class="flex justify-between text-xs mb-1.5">
-              <span class="text-slate-300 font-semibold">최근 미거래 경과 기간 (Recency)</span>
-              <span class="text-sky-400 font-bold" id="sim-val-recency">0년 (최근 거래)</span>
+            <div class="flex justify-between items-baseline text-xs mb-1.5">
+              <span class="text-slate-300 font-medium">최근 미거래 경과 기간 (Recency)</span>
+              <span class="text-rose-400 font-bold font-mono text-sm tnum" id="sim-disp-recency">0년 (최근 활성)</span>
             </div>
-            <input type="range" min="0" max="10" step="1" value="0" id="sim-input-recency" oninput="runSimulator()"
-              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500">
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-              <span>0년 (최근)</span>
-              <span>3년</span>
-              <span>6년 이상</span>
-              <span>10년</span>
+            <input type="range" min="0" max="10" step="1" value="0" id="sim-ctrl-recency" oninput="calculateSimulation()"
+                   class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+              <span>0년 (활성)</span>
+              <span>2년</span>
+              <span>5년</span>
+              <span>10년 (장기휴면)</span>
             </div>
           </div>
 
-          <!-- Param 4 & 5 Grid: Sector & Age -->
+          <!-- Grid: Sector & Demographic -->
           <div class="grid grid-cols-2 gap-4 pt-2">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">주요 금융 업종</label>
-              <select id="sim-input-sector" onchange="runSimulator()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500">
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">주요 거래 금융 업종</label>
+              <select id="sim-ctrl-sector" onchange="calculateSimulation()" class="w-full bg-[#0D0E14] hairline-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                 <option value="securities">증권 (Securities)</option>
                 <option value="insurance">보험 (Insurance)</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5">고객 연령대</label>
-              <select id="sim-input-age" onchange="runSimulator()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500">
-                <option value="20">20대</option>
-                <option value="30">30대</option>
-                <option value="40" selected>40대</option>
-                <option value="50">50대</option>
-                <option value="60">60대 이상</option>
+              <label class="block text-xs font-medium text-slate-300 mb-1.5">연령 및 소득 수준</label>
+              <select id="sim-ctrl-profile" onchange="calculateSimulation()" class="w-full bg-[#0D0E14] hairline-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                <option value="middle">40~50대 · 중위 소득 (5천만 미만)</option>
+                <option value="high">40~60대 · 고소득 (1억 원 이상)</option>
+                <option value="young">20~30대 · 사회초년생 (3천만 미만)</option>
               </select>
             </div>
           </div>
         </div>
 
-        <!-- Simulation Result Card (5 cols) -->
-        <div class="card-glass rounded-2xl p-6 lg:col-span-5 flex flex-col justify-between border-teal-500/50 shadow-lg shadow-teal-500/10">
-          <div>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30">
-              <i class="fa-solid fa-microchip mr-1.5"></i>K-Means AI 분류 결과
-            </span>
-            <div class="mt-4">
-              <div class="text-xs text-slate-400">예측 고객 세그먼트</div>
-              <h4 class="text-xl font-extrabold text-white mt-1" id="sim-res-name">증권 단발 중위 자산 고객</h4>
-              <div class="inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300" id="sim-res-tier">
-                Cluster 3 · 주력 볼륨 고객층 (Core Mass)
+        <!-- Output Prediction Column (5 cols) -->
+        <div class="bg-[#12141C] hairline-border rounded-xl p-5 sm:p-6 lg:col-span-5 flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Inference Result</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">CONFIRMED</span>
+            </div>
+
+            <div>
+              <span class="text-[11px] text-slate-400 font-mono" id="sim-res-cluster-id">CLUSTER 3</span>
+              <h3 class="text-lg font-bold text-white mt-0.5" id="sim-res-title">증권 단발 중위 자산 고객</h3>
+              <p class="text-xs text-slate-400 mt-1" id="sim-res-desc">
+                단발성 정액 거래 후 계좌를 유지 중인 주력 볼륨 세그먼트입니다.
+              </p>
+            </div>
+
+            <!-- Probability Match Progress Bars -->
+            <div class="bg-[#090A0F] p-4 rounded-xl hairline-border space-y-2.5">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-300 font-medium">군집 판정 신뢰도 (Confidence)</span>
+                <span class="font-mono font-bold text-emerald-400" id="sim-res-confidence">94.2%</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="sim-res-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 94%;"></div>
+              </div>
+              <div class="flex justify-between text-[10px] font-mono text-slate-400 pt-1">
+                <span>Centroid Distance: 0.18</span>
+                <span>Class: Stable</span>
               </div>
             </div>
 
-            <!-- Match Score Gauge -->
-            <div class="mt-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div class="flex justify-between text-xs">
-                <span class="text-slate-400">군집 중심점 매칭 유사도</span>
-                <span class="font-bold text-teal-400" id="sim-res-conf">94.2%</span>
-              </div>
-              <div class="w-full bg-slate-800 rounded-full h-2">
-                <div class="bg-gradient-to-r from-teal-500 to-emerald-400 h-2 rounded-full" id="sim-res-bar" style="width: 94%;"></div>
-              </div>
-            </div>
-
-            <!-- Tailored Next Action -->
-            <div class="mt-5 space-y-2">
-              <div class="text-xs font-bold text-slate-300">추천 넥스트 마케팅 액션:</div>
-              <div class="text-xs text-slate-300 bg-slate-900/40 p-3 rounded-lg border border-slate-800 leading-relaxed" id="sim-res-action">
-                적립식 자동이체 챌린지 및 ISA/연금저축 세액공제 특화 상품 안내를 통해 2차 거래 전환을 유도하세요.
+            <!-- Action Prescription -->
+            <div class="space-y-1.5 text-xs">
+              <span class="font-semibold text-slate-300">최적 마케팅 처방 (Prescription):</span>
+              <div class="p-3 rounded-lg bg-white/[0.03] hairline-border text-slate-300 leading-relaxed text-[11px]" id="sim-res-action">
+                적립식 자동이체 챌린지 및 ISA/연금저축 세액공제 특화 상품 안내를 통해 다회 거래 고객으로 전환 유도.
               </div>
             </div>
           </div>
 
-          <div class="text-[10px] text-slate-500 pt-4 border-t border-slate-800 mt-6">
-            * 33.5만 명 금융 고객의 K-Means 중심점 거리 함수 기반 실시간 판정
+          <div class="hairline-top pt-3 text-[11px] text-slate-400 font-mono flex items-center justify-between">
+            <span>Model: K-Means (K=4)</span>
+            <span>Real-time Scorer</span>
           </div>
         </div>
+
       </div>
     </div>
 
   </main>
 
-  <!-- Mobile Bottom Navigation Bar (iPhone / Android) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 card-glass border-t border-slate-800 px-2 py-2 flex justify-around items-center">
-    <button onclick="switchTab('overview')" id="m-btn-overview" class="flex flex-col items-center py-1 px-3 text-slate-400 tab-active">
-      <i class="fa-solid fa-chart-pie text-base"></i>
+  <!-- Mobile Touch Bottom Navigation (iPhone / iPad Mobile) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#090A0F]/95 backdrop-blur-lg hairline-top px-4 py-2 flex justify-around items-center">
+    <button onclick="switchView('overview')" id="m-btn-overview" class="flex flex-col items-center py-1 text-white">
+      <i class="fa-solid fa-chart-pie text-sm"></i>
       <span class="text-[10px] mt-1 font-medium">개요</span>
     </button>
-    <button onclick="switchTab('clusters')" id="m-btn-clusters" class="flex flex-col items-center py-1 px-3 text-slate-400">
-      <i class="fa-solid fa-users text-base"></i>
-      <span class="text-[10px] mt-1 font-medium">군집</span>
+    <button onclick="switchView('matrix')" id="m-btn-matrix" class="flex flex-col items-center py-1 text-slate-400">
+      <i class="fa-solid fa-table-cells text-sm"></i>
+      <span class="text-[10px] mt-1 font-medium">매트릭스</span>
     </button>
-    <button onclick="switchTab('strategy')" id="m-btn-strategy" class="flex flex-col items-center py-1 px-3 text-slate-400">
-      <i class="fa-solid fa-bullseye text-base"></i>
-      <span class="text-[10px] mt-1 font-medium">전략</span>
+    <button onclick="switchView('strategy')" id="m-btn-strategy" class="flex flex-col items-center py-1 text-slate-400">
+      <i class="fa-solid fa-list-check text-sm"></i>
+      <span class="text-[10px] mt-1 font-medium">CRM큐</span>
     </button>
-    <button onclick="switchTab('simulator')" id="m-btn-simulator" class="flex flex-col items-center py-1 px-3 text-slate-400">
-      <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
-      <span class="text-[10px] mt-1 font-medium">시뮬레이터</span>
+    <button onclick="switchView('sandbox')" id="m-btn-sandbox" class="flex flex-col items-center py-1 text-slate-400">
+      <i class="fa-solid fa-sliders text-sm"></i>
+      <span class="text-[10px] mt-1 font-medium">시뮬레이션</span>
     </button>
   </nav>
 
-  <!-- App Logic & Service Worker Registration -->
+  <!-- Application Logic -->
   <script>
     let globalData = null;
     let shareChart = null;
     let compChart = null;
 
-    // Service Worker Registration for PWA
+    // Service Worker for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => {
-          console.log('PWA ServiceWorker registered:', reg.scope);
-        }).catch(err => console.log('ServiceWorker error:', err));
+        navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW error:', e));
       });
     }
 
-    // Tab Switching Function
-    function switchTab(tabId) {
-      const tabs = ['overview', 'clusters', 'strategy', 'simulator'];
-      tabs.forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        const desktopBtn = document.getElementById(`nav-btn-${t}`);
-        const mobileBtn = document.getElementById(`m-btn-${t}`);
-        if (desktopBtn) {
-          desktopBtn.classList.remove('tab-active-bg');
-          desktopBtn.classList.remove('border-transparent');
-        }
-        if (mobileBtn) {
-          mobileBtn.classList.remove('tab-active');
+    // View Switching Logic
+    function switchView(viewId) {
+      const views = ['overview', 'matrix', 'strategy', 'sandbox'];
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        const dBtn = document.getElementById(`nav-btn-${v}`);
+        const mBtn = document.getElementById(`m-btn-${v}`);
+        if (dBtn) dBtn.classList.remove('nav-active');
+        if (mBtn) {
+          mBtn.classList.remove('text-white');
+          mBtn.classList.add('text-slate-400');
         }
       });
 
-      document.getElementById(`view-${tabId}`).classList.remove('hidden');
-      const curDesktop = document.getElementById(`nav-btn-${tabId}`);
-      const curMobile = document.getElementById(`m-btn-${tabId}`);
-      if (curDesktop) curDesktop.classList.add('tab-active-bg');
-      if (curMobile) curMobile.classList.add('tab-active');
+      document.getElementById(`view-${viewId}`).classList.remove('hidden');
+      const curD = document.getElementById(`nav-btn-${viewId}`);
+      const curM = document.getElementById(`m-btn-${viewId}`);
+      if (curD) curD.classList.add('nav-active');
+      if (curM) {
+        curM.classList.remove('text-slate-400');
+        curM.classList.add('text-white');
+      }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Load Data
-    async function initApp() {
+    // Load Data & Initialize
+    async function init() {
       try {
         const res = await fetch('./dashboard/data/dashboard_summary.json');
-        if (!res.ok) throw new Error('데이터 로드 실패');
+        if (!res.ok) throw new Error('Data load failure');
         globalData = await res.json();
         renderCharts();
-        renderClusterCards();
-        runSimulator();
-      } catch (e) {
-        console.error(e);
+        renderMatrixTable();
+        calculateSimulation();
+      } catch (err) {
+        console.error(err);
       }
     }
 
-    // Render Charts
+    // Chart.js Professional Finance Rendering
     function renderCharts() {
       const clusters = globalData.clusters;
-      const colors = ['#8b5cf6', '#06b6d4', '#f43f5e', '#3b82f6'];
+      const palette = ['#A855F7', '#06B6D4', '#F43F5E', '#3B82F6'];
 
-      // Share Doughnut
+      // Donut Chart
       const ctx1 = document.getElementById('chart-share').getContext('2d');
       shareChart = new Chart(ctx1, {
         type: 'doughnut',
         data: {
-          labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
+          labels: clusters.map(c => c.persona_name.split(' ')[0]),
           datasets: [{
             data: clusters.map(c => c.count),
-            backgroundColor: colors,
-            borderWidth: 2,
-            borderColor: '#020617'
+            backgroundColor: palette,
+            borderColor: '#090A0F',
+            borderWidth: 3,
+            hoverOffset: 4
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } }
-          }
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#161922',
+              titleColor: '#F8FAFC',
+              bodyColor: '#94A3B8',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              padding: 10,
+              boxPadding: 4,
+              callbacks: {
+                label: function(ctx) {
+                  const c = clusters[ctx.dataIndex];
+                  return ` ${c.persona_name}: ${c.count.toLocaleString()}명 (${c.percentage}%)`;
+                }
+              }
+            }
+          },
+          cutout: '72%'
         }
       });
 
@@ -561,24 +751,28 @@
       compChart = new Chart(ctx2, {
         type: 'bar',
         data: {
-          labels: clusters.map(c => `C${c.cluster_id}\n${c.persona_name.split(' ')[0]}`),
+          labels: clusters.map(c => c.persona_name.split(' ')[0]),
           datasets: [
             {
               type: 'bar',
               label: '평균 거래액 (만 원)',
               data: clusters.map(c => Math.round(c.monetary_mean_krw / 10000)),
-              backgroundColor: '#10b981',
-              borderRadius: 6,
-              yAxisID: 'y'
+              backgroundColor: 'rgba(16, 185, 129, 0.85)',
+              hoverBackgroundColor: '#10B981',
+              borderRadius: 4,
+              yAxisID: 'y',
+              barPercentage: 0.55
             },
             {
               type: 'line',
               label: '다회 거래율 (%)',
               data: clusters.map(c => c.repeat_customer_pct),
-              borderColor: '#f97316',
-              backgroundColor: '#f97316',
-              pointRadius: 5,
-              borderWidth: 2.5,
+              borderColor: '#F59E0B',
+              backgroundColor: '#F59E0B',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#F59E0B',
+              borderWidth: 2,
               yAxisID: 'y1'
             }
           ]
@@ -586,23 +780,39 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            x: {
+              ticks: { color: '#64748B', font: { size: 11, family: 'Pretendard' } },
+              grid: { display: false }
+            },
             y: {
-              type: 'linear',
               position: 'left',
-              ticks: { color: '#10b981', callback: v => `${v.toLocaleString()}만` },
-              grid: { color: '#1e293b' }
+              ticks: {
+                color: '#64748B',
+                font: { size: 10, family: 'SF Mono' },
+                callback: v => `${v.toLocaleString()}만`
+              },
+              grid: { color: 'rgba(255, 255, 255, 0.04)' }
             },
             y1: {
-              type: 'linear',
               position: 'right',
-              ticks: { color: '#f97316', callback: v => `${v}%` },
+              ticks: {
+                color: '#F59E0B',
+                font: { size: 10, family: 'SF Mono' },
+                callback: v => `${v}%`
+              },
               grid: { display: false }
             }
           },
           plugins: {
-            legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#161922',
+              borderColor: 'rgba(255,255,255,0.1)',
+              borderWidth: 1,
+              padding: 10
+            }
           }
         }
       });
@@ -617,17 +827,18 @@
           datasets: [
             {
               label: 'Inertia (÷10만)',
-              data: kEval.inertias.map(v => v / 100000),
-              borderColor: '#38bdf8',
-              backgroundColor: '#38bdf8',
-              tension: 0.2
+              data: kEval.inertias.map(v => (v / 100000).toFixed(1)),
+              borderColor: 'rgba(255, 255, 255, 0.3)',
+              pointRadius: 3,
+              tension: 0.1
             },
             {
-              label: '실루엣 계수',
+              label: 'Silhouette Score',
               data: kEval.silhouette_scores,
-              borderColor: '#f59e0b',
-              backgroundColor: '#f59e0b',
-              tension: 0.2,
+              borderColor: '#10B981',
+              pointBackgroundColor: '#10B981',
+              pointRadius: 4,
+              tension: 0.1,
               yAxisID: 'y1'
             }
           ]
@@ -636,32 +847,32 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#38bdf8', font: { size: 10 } }, grid: { color: '#1e293b' } },
-            y1: { position: 'right', ticks: { color: '#f59e0b', font: { size: 10 } }, grid: { display: false } }
+            x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#64748B', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+            y1: { position: 'right', ticks: { color: '#10B981', font: { size: 9 } }, grid: { display: false } }
           },
-          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }
+          plugins: { legend: { display: false } }
         }
       });
 
-      // Sector & Tenure
+      // Domain & Tenure
       const ctx4 = document.getElementById('chart-tenure-sector').getContext('2d');
       new Chart(ctx4, {
         type: 'bar',
         data: {
-          labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
+          labels: clusters.map(c => c.persona_name.split(' ')[0]),
           datasets: [
             {
               label: '증권 비중 (%)',
               data: clusters.map(c => c.securities_pct),
-              backgroundColor: '#6366f1',
-              borderRadius: 4
+              backgroundColor: 'rgba(99, 102, 241, 0.7)',
+              borderRadius: 3
             },
             {
-              label: '평균 관계연수 (년)',
+              label: '관계 유지 연수 (년)',
               data: clusters.map(c => c.tenure_years_mean),
-              backgroundColor: '#a855f7',
-              borderRadius: 4
+              backgroundColor: 'rgba(168, 85, 247, 0.7)',
+              borderRadius: 3
             }
           ]
         },
@@ -669,143 +880,199 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+            x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#64748B', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
           },
-          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }
+          plugins: { legend: { display: false } }
         }
       });
     }
 
-    // Render Detailed Cluster Cards
-    function renderClusterCards(filterId = 'all') {
-      const container = document.getElementById('clusters-cards-grid');
+    // Workhorse Table Rendering
+    function renderMatrixTable() {
+      const tbody = document.getElementById('matrix-table-body');
       const clusters = globalData.clusters;
-      const targetClusters = filterId === 'all' ? clusters : clusters.filter(c => c.cluster_id === filterId);
 
-      const colorMap = {
-        0: { border: 'border-purple-500/40', badge: 'bg-purple-500/20 text-purple-300', icon: 'fa-crown text-purple-400' },
-        1: { border: 'border-cyan-500/40', badge: 'bg-cyan-500/20 text-cyan-300', icon: 'fa-shield-heart text-cyan-400' },
-        2: { border: 'border-rose-500/40', badge: 'bg-rose-500/20 text-rose-300', icon: 'fa-triangle-exclamation text-rose-400' },
-        3: { border: 'border-blue-500/40', badge: 'bg-blue-500/20 text-blue-300', icon: 'fa-chart-line text-blue-400' }
+      const badgeMap = {
+        0: 'text-purple-300 bg-purple-500/10 border-purple-500/20',
+        1: 'text-cyan-300 bg-cyan-500/10 border-cyan-500/20',
+        2: 'text-rose-300 bg-rose-500/10 border-rose-500/20',
+        3: 'text-blue-300 bg-blue-500/10 border-blue-500/20'
       };
 
-      container.innerHTML = targetClusters.map(c => {
-        const theme = colorMap[c.cluster_id];
-        return `
-          <div class="card-glass rounded-2xl p-5 border ${theme.border} space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${theme.badge}">
-                <i class="fa-solid ${theme.icon} mr-1.5"></i>Cluster ${c.cluster_id}
-              </span>
-              <span class="text-xs text-slate-400 font-mono">${c.count.toLocaleString()}명 (${c.percentage}%)</span>
+      tbody.innerHTML = clusters.map(c => `
+        <tr onclick="inspectSegment(${c.cluster_id})" class="hover:bg-white/[0.03] cursor-pointer transition">
+          <td class="py-3 px-4 font-semibold text-white">
+            ${c.persona_name}
+            <div class="text-[10px] text-slate-400 font-mono">Cluster ${c.cluster_id}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono border ${badgeMap[c.cluster_id]}">
+              Tier ${c.cluster_id + 1}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right font-mono tnum">
+            ${c.count.toLocaleString()}
+            <span class="text-slate-400 text-[11px]">(${c.percentage}%)</span>
+          </td>
+          <td class="py-3 px-4 text-right font-mono tnum text-emerald-400 font-semibold">
+            ${(c.monetary_mean_krw / 10000).toLocaleString()}만 원
+          </td>
+          <td class="py-3 px-4 text-right font-mono tnum ${c.repeat_customer_pct > 50 ? 'text-amber-400 font-semibold' : 'text-slate-400'}">
+            ${c.repeat_customer_pct}%
+          </td>
+          <td class="py-3 px-4 text-right font-mono tnum ${c.recency_years_mean > 3 ? 'text-rose-400 font-semibold' : 'text-slate-400'}">
+            ${c.recency_years_mean}년
+          </td>
+          <td class="py-3 px-4 text-right font-mono tnum text-slate-300">
+            ${c.tenure_years_mean}년
+          </td>
+          <td class="py-3 px-4">
+            <div class="text-[11px] font-mono">
+              <span class="text-indigo-400">증권 ${c.securities_pct}%</span>
+              <span class="text-slate-600">/</span>
+              <span class="text-cyan-400">보험 ${(100 - c.securities_pct).toFixed(1)}%</span>
             </div>
-            <div>
-              <h3 class="text-base font-bold text-white">${c.persona_name}</h3>
-              <p class="text-xs text-slate-400 mt-0.5">평균 누적 거래액: <strong class="text-emerald-400">${(c.monetary_mean_krw/10000).toLocaleString()}만 원</strong></p>
-            </div>
-            <div class="grid grid-cols-3 gap-2 bg-slate-900/60 p-3 rounded-xl text-center text-xs border border-slate-800">
-              <div>
-                <span class="text-[10px] text-slate-400">다회 거래율</span>
-                <div class="font-bold text-orange-400 mt-0.5">${c.repeat_customer_pct}%</div>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400">평균 관계연수</span>
-                <div class="font-bold text-sky-400 mt-0.5">${c.tenure_years_mean}년</div>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400">최근 미거래</span>
-                <div class="font-bold text-rose-400 mt-0.5">${c.recency_years_mean}년</div>
-              </div>
-            </div>
-            <div class="text-xs text-slate-300 space-y-1">
-              <div>• <strong>업종 비중:</strong> 증권 ${c.securities_pct}% / 보험 ${(100-c.securities_pct).toFixed(1)}%</div>
-              <div>• <strong>소득/연령:</strong> 평균 소득구간 ${c.income_ordinal_mean}단계 / 평균 연령대 ${c.age_ordinal_mean}단계</div>
-            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Initialize with Cluster 0 detail
+      inspectSegment(0);
+    }
+
+    function inspectSegment(cid) {
+      const c = globalData.clusters.find(item => item.cluster_id === cid);
+      const detailContainer = document.getElementById('segment-detail-card');
+
+      const narrativeMap = {
+        0: "당사 최우량 VIP 고객층으로 100% 다회 거래를 유지하고 있습니다. 장기적 관계 연수(14.2년)와 1.55억 원의 높은 거래액을 보유하여 LTV 락인과 고액 신탁 크로스셀링이 핵심입니다.",
+        1: "최근 1년 이내 유입된 신규 소액 보험 고객층입니다. 92%가 보험에 치중되어 있어 모바일 헬스케어 리포트 및 소액 적립식 펀드/ISA를 통한 증권 계좌 교차 유치가 최우선입니다.",
+        2: "평균 1.5억 원의 자산을 거래한 최고소득층 고객이지만 최근 6.4년간 추가 거래 없이 멈춰 있습니다. 잠자는 휴면 자산 점검 리포트와 고금리 특판 채권을 통한 윈백이 시급합니다.",
+        3: "전체 고객의 56.3%를 차지하는 주력 단발 거래층입니다. 평균 11.6년간 계좌를 보유하며 5,404만 원을 1회 집행했습니다. 적립식 자동이체 챌린지를 통한 다회 거래 전환이 과제입니다."
+      };
+
+      detailContainer.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 hairline-bottom gap-2">
+          <div>
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Selected Segment Inspector</div>
+            <h3 class="text-lg font-bold text-white mt-0.5">${c.persona_name} (Cluster ${c.cluster_id})</h3>
           </div>
-        `;
-      }).join('');
+          <div class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded hairline-border">
+            ${c.count.toLocaleString()} Profiles · ${(c.count / globalData.metadata.total_customers * 100).toFixed(1)}% Market Share
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed mt-4">
+          ${narrativeMap[cid]}
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border text-center">
+            <span class="text-[10px] text-slate-400 uppercase font-mono">Mean Monetary</span>
+            <div class="text-sm font-bold text-emerald-400 font-mono mt-1">${(c.monetary_mean_krw/10000).toLocaleString()}만 원</div>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border text-center">
+            <span class="text-[10px] text-slate-400 uppercase font-mono">Median Monetary</span>
+            <div class="text-sm font-bold text-white font-mono mt-1">${(c.monetary_median_krw/10000).toLocaleString()}만 원</div>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border text-center">
+            <span class="text-[10px] text-slate-400 uppercase font-mono">Repeat Rate</span>
+            <div class="text-sm font-bold text-amber-400 font-mono mt-1">${c.repeat_customer_pct}%</div>
+          </div>
+          <div class="bg-[#090A0F] p-3 rounded-lg hairline-border text-center">
+            <span class="text-[10px] text-slate-400 uppercase font-mono">Inactive Years</span>
+            <div class="text-sm font-bold text-rose-400 font-mono mt-1">${c.recency_years_mean}년</div>
+          </div>
+        </div>
+      `;
     }
 
-    function filterCluster(cid) {
-      ['all', 0, 1, 2, 3].forEach(id => {
-        const btn = document.getElementById(`pill-${id}`);
-        if (id === cid) {
-          btn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-teal-500 text-slate-950';
-        } else {
-          btn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300';
-        }
-      });
-      renderClusterCards(cid);
-    }
+    // Bloomberg Style Simulation Sandbox
+    function calculateSimulation() {
+      const amt = parseInt(document.getElementById('sim-ctrl-monetary').value);
+      const freq = parseInt(document.getElementById('sim-ctrl-frequency').value);
+      const rec = parseInt(document.getElementById('sim-ctrl-recency').value);
+      const sec = document.getElementById('sim-ctrl-sector').value;
 
-    // AI Simulator Logic (Centroid Distance Match)
-    function runSimulator() {
-      const amtManwon = parseInt(document.getElementById('sim-input-monetary').value);
-      const freq = parseInt(document.getElementById('sim-input-frequency').value);
-      const recency = parseInt(document.getElementById('sim-input-recency').value);
-      const sector = document.getElementById('sim-input-sector').value;
-      const age = parseInt(document.getElementById('sim-input-age').value);
+      document.getElementById('sim-disp-monetary').innerText = `${amt.toLocaleString()}만 원`;
+      document.getElementById('sim-disp-frequency').innerText = `${freq}회 (${freq > 1 ? '다회' : '단발'})`;
+      document.getElementById('sim-disp-recency').innerText = `${rec}년 (${rec === 0 ? '최근거래' : '미거래 경과'})`;
 
-      document.getElementById('sim-val-monetary').innerText = `${amtManwon.toLocaleString()}만 원`;
-      document.getElementById('sim-val-frequency').innerText = `${freq}회 (${freq > 1 ? '다회' : '단발'})`;
-      document.getElementById('sim-val-recency').innerText = `${recency}년 (${recency === 0 ? '최근거래' : '미거래 경과'})`;
+      let cid = 3;
+      let conf = 92.4;
 
-      // Classification Logic matching K-Means boundaries
-      let clusterId = 3;
-      let conf = 90.0;
-
-      if (recency >= 3 && amtManwon >= 5000) {
-        clusterId = 2; // Dormant HNW
-        conf = Math.min(99, 85 + (recency * 2));
-      } else if (freq >= 2 && amtManwon >= 4000) {
-        clusterId = 0; // VIP Loyal
-        conf = Math.min(99, 88 + (freq * 3));
-      } else if (sector === 'insurance' && amtManwon < 1000) {
-        clusterId = 1; // New Insurance
-        conf = 95.5;
+      if (rec >= 3 && amt >= 5000) {
+        cid = 2;
+        conf = Math.min(99.2, 86 + rec * 1.5);
+      } else if (freq >= 2 && amt >= 4000) {
+        cid = 0;
+        conf = Math.min(99.0, 88 + freq * 2.8);
+      } else if (sec === 'insurance' && amt < 1200) {
+        cid = 1;
+        conf = 95.8;
       } else {
-        clusterId = 3; // Core Securities
-        conf = 92.4;
+        cid = 3;
+        conf = 93.1;
       }
 
-      const clusterMeta = {
+      const meta = {
         0: {
-          name: "VIP 다빈도 장기 충성 고객",
-          tier: "Cluster 0 · 최우량 핵심 고객층 (Tier 1)",
-          tierClass: "bg-purple-500/20 text-purple-300",
-          action: "1:1 전담 PB를 매칭하여 글로벌 랩어카운트 및 사모펀드 우선 배정으로 자산 수탁고(AUM)를 극대화하세요."
+          title: "VIP 다빈도 장기 충성 고객",
+          desc: "고액 자산을 장기간에 걸쳐 2회 이상 운용한 핵심 자산가입니다.",
+          action: "1:1 전담 PB 매칭 및 글로벌 랩어카운트, 고액 신탁 크로스셀링을 최우선 추진하세요."
         },
         1: {
-          name: "신규 유입 소액 보험 고객",
-          tier: "Cluster 1 · 신규 성장 잠재층 (Tier 3)",
-          tierClass: "bg-cyan-500/20 text-cyan-300",
-          action: "모바일 헬스케어 리포트 및 보장 분석 무료 제공과 소액 적립식 펀드/ISA 계좌 개설 프로모션을 제안하세요."
+          title: "신규 유입 소액 보험 고객",
+          desc: "최근 1년 이내 소액 보험으로 신규 진입한 잠재 고객층입니다.",
+          action: "모바일 헬스케어 리포트 및 소액 적립식 펀드/ISA 계좌 개설 프로모션을 제안하세요."
         },
         2: {
-          name: "고액 자산가 이탈 징후 고객",
-          tier: "Cluster 2 · 최우선 윈백 대상 (High Risk)",
-          tierClass: "bg-rose-500/20 text-rose-300",
-          action: "최근 미거래 자산 점검 리포트 발송과 한시적 단기 고금리 특판 채권/RP를 우선 배정하여 긴급 윈백을 진행하세요."
+          title: "고액 자산가 이탈 징후 고객",
+          desc: "과거 고액을 거래했으나 3년 이상 미거래로 이탈 위험이 매우 높습니다.",
+          action: "휴면 자산 점검 리포트 및 단기 고금리 특판 채권을 우선 배정하여 긴급 윈백을 집행하세요."
         },
         3: {
-          name: "증권 단발 중위 자산 고객",
-          tier: "Cluster 3 · 주력 볼륨 고객층 (Core Mass)",
-          tierClass: "bg-blue-500/20 text-blue-300",
-          action: "적립식 자동이체 챌린지 및 연금저축/IRP 세액공제 특화 상품 안내를 통해 다회 거래 고객으로 전환시키세요."
+          title: "증권 단발 중위 자산 고객",
+          desc: "장기 계좌를 보유하며 1회 정액 거래 후 유지 중인 주력 볼륨층입니다.",
+          action: "적립식 자동이체 챌린지 및 연금저축/IRP 세액공제 특화 상품으로 2차 거래를 유도하세요."
         }
       };
 
-      const res = clusterMeta[clusterId];
-      document.getElementById('sim-res-name').innerText = res.name;
-      document.getElementById('sim-res-tier').innerText = res.tier;
-      document.getElementById('sim-res-tier').className = `inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-lg ${res.tierClass}`;
-      document.getElementById('sim-res-conf').innerText = `${conf.toFixed(1)}%`;
+      document.getElementById('sim-res-cluster-id').innerText = `CLUSTER ${cid}`;
+      document.getElementById('sim-res-title').innerText = meta[cid].title;
+      document.getElementById('sim-res-desc').innerText = meta[cid].desc;
+      document.getElementById('sim-res-confidence').innerText = `${conf.toFixed(1)}%`;
       document.getElementById('sim-res-bar').style.width = `${conf}%`;
-      document.getElementById('sim-res-action').innerText = res.action;
+      document.getElementById('sim-res-action').innerText = meta[cid].action;
     }
 
-    document.addEventListener('DOMContentLoaded', initApp);
+    function applyPreset(type) {
+      if (type === 'dormant') {
+        document.getElementById('sim-ctrl-monetary').value = 15000;
+        document.getElementById('sim-ctrl-frequency').value = 1;
+        document.getElementById('sim-ctrl-recency').value = 6;
+        document.getElementById('sim-ctrl-sector').value = 'securities';
+      } else if (type === 'vip') {
+        document.getElementById('sim-ctrl-monetary').value = 18000;
+        document.getElementById('sim-ctrl-frequency').value = 3;
+        document.getElementById('sim-ctrl-recency').value = 0;
+        document.getElementById('sim-ctrl-sector').value = 'securities';
+      } else if (type === 'insurance') {
+        document.getElementById('sim-ctrl-monetary').value = 300;
+        document.getElementById('sim-ctrl-frequency').value = 1;
+        document.getElementById('sim-ctrl-recency').value = 0;
+        document.getElementById('sim-ctrl-sector').value = 'insurance';
+      } else if (type === 'core') {
+        document.getElementById('sim-ctrl-monetary').value = 5000;
+        document.getElementById('sim-ctrl-frequency').value = 1;
+        document.getElementById('sim-ctrl-recency').value = 0;
+        document.getElementById('sim-ctrl-sector').value = 'securities';
+      }
+      calculateSimulation();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
