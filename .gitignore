@@ -1,8 +1,12 @@
-# Data files
-data/
+# Root data files
+/data/
 *.csv
 *.zip
 *.parquet
+
+# Allow public dashboard summary
+!dashboard/data/
+!dashboard/data/dashboard_summary.json
 
 # Python & Virtualenv
 .venv/

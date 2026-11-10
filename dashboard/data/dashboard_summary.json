@@ -1,0 +1,118 @@
+{
+  "k_evaluation": {
+    "k_values": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "inertias": [
+      1590004.453220568,
+      1236532.2184027378,
+      979084.5370040842,
+      777645.6698545169,
+      663504.7341299135
+    ],
+    "silhouette_scores": [
+      0.3036,
+      0.3008,
+      0.3476,
+      0.3689,
+      0.3268
+    ],
+    "calinski_harabasz": [
+      7986.1,
+      9392.0,
+      10411.5,
+      11801.7,
+      12071.9
+    ],
+    "davies_bouldin": [
+      1.6729,
+      1.4215,
+      1.1093,
+      1.0249,
+      0.9999
+    ]
+  },
+  "optimal_k": 4,
+  "pca_variance_ratio": [
+    0.3101,
+    0.2164
+  ],
+  "clusters": [
+    {
+      "cluster_id": 0,
+      "count": 41815,
+      "percentage": 12.46,
+      "recency_years_mean": 0.05,
+      "frequency_mean": 2.13,
+      "repeat_customer_pct": 100.0,
+      "monetary_mean_krw": 155765555.0,
+      "monetary_median_krw": 30000000.0,
+      "tenure_years_mean": 14.22,
+      "age_ordinal_mean": 3.58,
+      "income_ordinal_mean": 3.06,
+      "securities_pct": 96.1,
+      "persona_name": "VIP 다빈도 장기 충성 고객 (VIP Loyal)"
+    },
+    {
+      "cluster_id": 1,
+      "count": 77842,
+      "percentage": 23.2,
+      "recency_years_mean": 0.04,
+      "frequency_mean": 1.01,
+      "repeat_customer_pct": 0.91,
+      "monetary_mean_krw": 2465534.0,
+      "monetary_median_krw": 900000.0,
+      "tenure_years_mean": 0.87,
+      "age_ordinal_mean": 3.52,
+      "income_ordinal_mean": 3.01,
+      "securities_pct": 7.95,
+      "persona_name": "신규 유입 소액 보험 고객 (New Entry Insurance)"
+    },
+    {
+      "cluster_id": 2,
+      "count": 26914,
+      "percentage": 8.02,
+      "recency_years_mean": 6.43,
+      "frequency_mean": 1.06,
+      "repeat_customer_pct": 6.02,
+      "monetary_mean_krw": 150175229.0,
+      "monetary_median_krw": 80000000.0,
+      "tenure_years_mean": 7.93,
+      "age_ordinal_mean": 3.17,
+      "income_ordinal_mean": 4.8,
+      "securities_pct": 97.23,
+      "persona_name": "고액 자산가 이탈 징후 고객 (HNW Dormant)"
+    },
+    {
+      "cluster_id": 3,
+      "count": 188935,
+      "percentage": 56.31,
+      "recency_years_mean": 0.02,
+      "frequency_mean": 1.0,
+      "repeat_customer_pct": 0.0,
+      "monetary_mean_krw": 54041159.0,
+      "monetary_median_krw": 10000000.0,
+      "tenure_years_mean": 11.64,
+      "age_ordinal_mean": 3.57,
+      "income_ordinal_mean": 2.49,
+      "securities_pct": 99.6,
+      "persona_name": "증권 단발 중위 자산 고객 (Core Securities)"
+    }
+  ],
+  "metadata": {
+    "total_customers": 335506,
+    "features_used": [
+      "recency_log_std",
+      "frequency_log_std",
+      "monetary_log_std",
+      "tenure_log_std",
+      "age_ordinal_std",
+      "income_ordinal_std"
+    ],
+    "reference_year": 2025
+  }
+}
