@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#grad)"/>
+  <!-- Pie / Analytics Chart Icon -->
+  <path d="M256 96 A160 160 0 0 1 416 256 L256 256 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M240 112 A144 144 0 1 0 384 256 L240 256 Z" fill="#ffffff" opacity="0.75"/>
+  <circle cx="256" cy="256" r="48" fill="#0f172a"/>
+  <!-- Dollar / Won symbol or spark -->
+  <path d="M256 228 L256 284 M236 244 L276 244 M236 268 L276 268" stroke="#38bdf8" stroke-width="8" stroke-linecap="round"/>
+</svg>

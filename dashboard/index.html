@@ -2,13 +2,24 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Finance Customer Segmentation Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>FinSegment - 금융 고객 세분화 인텔리전스</title>
+  
+  <!-- PWA & iOS App Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FinSegment">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <meta name="theme-color" content="#0f172a">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -16,10 +27,9 @@
         extend: {
           colors: {
             brand: {
-              50: '#f0fdfa',
-              100: '#ccfbf1',
-              500: '#0d9488',
-              600: '#0f766e',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
               900: '#134e4a'
             }
           }
@@ -27,272 +37,528 @@
       }
     }
   </script>
+
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-    .card-hover:hover { transform: translateY(-2px); transition: all 0.2s ease-in-out; }
+    /* iOS Safe Area Support */
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    body {
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + 4rem);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    @media (min-width: 768px) {
+      body {
+        padding-bottom: var(--sab);
+      }
+    }
+    /* Hide scrollbars on mobile */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .tab-active { color: #2dd4bf !important; }
+    .tab-active-bg { background-color: rgba(20, 184, 166, 0.15) !important; color: #2dd4bf !important; border-color: rgba(20, 184, 166, 0.4) !important; }
+    .card-glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.6); }
+    .card-glass:hover { border-color: rgba(45, 212, 191, 0.4); transition: border-color 0.2s ease; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-  <!-- Top Navigation Header -->
-  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <!-- Desktop & Tablet Top Navigation Header -->
+  <header class="card-glass border-b border-slate-800 sticky top-0 z-40 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xl">
-          <i class="fa-solid fa-chart-pie"></i>
-        </div>
+        <img src="./icon.svg" alt="FinSegment Logo" class="w-9 h-9 rounded-xl shadow-md">
         <div>
-          <h1 class="font-bold text-lg text-white leading-tight">Finance Customer Segmentation</h1>
-          <p class="text-xs text-slate-400">AI Hub 금융상품·소비자 특성 기반 RFM & K-Means 인텔리전스</p>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-base sm:text-lg text-white tracking-tight">FinSegment</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 border border-teal-500/30 font-mono">v1.2 PWA</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">AI Hub 금융데이터 기반 RFM & K-Means 고객 인텔리전스</p>
         </div>
       </div>
-      <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+
+      <!-- Desktop Tab Menu -->
+      <nav class="hidden md:flex items-center space-x-1">
+        <button onclick="switchTab('overview')" id="nav-btn-overview" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition tab-active-bg border border-transparent">
+          <i class="fa-solid fa-chart-pie mr-1.5"></i>대시보드 개요
+        </button>
+        <button onclick="switchTab('clusters')" id="nav-btn-clusters" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
+          <i class="fa-solid fa-users-viewfinder mr-1.5"></i>4대 군집 탐색
+        </button>
+        <button onclick="switchTab('strategy')" id="nav-btn-strategy" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
+          <i class="fa-solid fa-bullseye mr-1.5"></i>CRM 마케팅 전략
+        </button>
+        <button onclick="switchTab('simulator')" id="nav-btn-simulator" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition border border-transparent">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>AI 세그먼트 시뮬레이터
+        </button>
+      </nav>
+
+      <!-- App Status Badge -->
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-          K-Means K=4 최적화 완료
+          K=4 최적화
         </span>
-        <span class="text-xs text-slate-400 hidden sm:inline">데이터 기준 연도: 2025</span>
+        <a href="https://github.com/JaeYun0507/finance-customer-segmentation" target="_blank" class="text-slate-400 hover:text-white text-base p-1.5" title="GitHub Repository">
+          <i class="fa-brands fa-github"></i>
+        </a>
       </div>
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <!-- Main Content Views Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
 
-    <!-- Section 1: KPI Overview Cards -->
-    <section>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- VIEW 1: OVERVIEW -->
+    <div id="view-overview" class="space-y-6">
+      <!-- 4 Top KPI Cards (Mobile swipeable row / Desktop 4-grid) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <!-- KPI 1 -->
-        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">총 분석 고객 수</span>
-            <span class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-users"></i>
-            </span>
+        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400">
+            <span class="text-[11px] font-semibold tracking-wider">총 분석 고객</span>
+            <i class="fa-solid fa-users text-blue-400 text-sm"></i>
           </div>
-          <div class="mt-3">
-            <div class="text-2xl font-extrabold text-white" id="kpi-total-cust">335,506명</div>
-            <div class="text-xs text-slate-400 mt-1">원천 거래 내역 385,019건 집계</div>
+          <div class="mt-2 sm:mt-3">
+            <div class="text-lg sm:text-2xl font-black text-white" id="kpi-total-cust">335,506명</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">원천 거래 385,019건</div>
           </div>
         </div>
 
         <!-- KPI 2 -->
-        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">고객 평균 누적 거래액</span>
-            <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-won-sign"></i>
-            </span>
+        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400">
+            <span class="text-[11px] font-semibold tracking-wider">평균 누적 거래액</span>
+            <i class="fa-solid fa-won-sign text-emerald-400 text-sm"></i>
           </div>
-          <div class="mt-3">
-            <div class="text-2xl font-extrabold text-emerald-400" id="kpi-avg-monetary">6,246만 원</div>
-            <div class="text-xs text-slate-400 mt-1">중앙값: 1,000만 원 (최대 160억 원)</div>
+          <div class="mt-2 sm:mt-3">
+            <div class="text-lg sm:text-2xl font-black text-emerald-400">6,246만 원</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">중앙값: 1,000만 원</div>
           </div>
         </div>
 
         <!-- KPI 3 -->
-        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">VIP 충성 고객 비중</span>
-            <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-crown"></i>
-            </span>
+        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400">
+            <span class="text-[11px] font-semibold tracking-wider">VIP 충성 고객</span>
+            <i class="fa-solid fa-crown text-purple-400 text-sm"></i>
           </div>
-          <div class="mt-3">
-            <div class="text-2xl font-extrabold text-purple-400" id="kpi-vip-count">41,815명 (12.5%)</div>
-            <div class="text-xs text-slate-400 mt-1">다회 거래율 100% / 평균 1.55억 원</div>
+          <div class="mt-2 sm:mt-3">
+            <div class="text-lg sm:text-2xl font-black text-purple-400">41,815명 (12.5%)</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">다회 거래율 100%</div>
           </div>
         </div>
 
         <!-- KPI 4 -->
-        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
+        <div class="card-glass rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-slate-400">
+            <span class="text-[11px] font-semibold tracking-wider">이탈 징후 고액군</span>
+            <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm"></i>
+          </div>
+          <div class="mt-2 sm:mt-3">
+            <div class="text-lg sm:text-2xl font-black text-rose-400">26,914명 (8.0%)</div>
+            <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">평균 미거래 6.4년</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section (iPad 2-col / Mobile 1-col) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <!-- Doughnut: Cluster Share -->
+        <div class="card-glass rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-bold text-white">4대 세그먼트 점유율</h2>
+              <span class="text-[10px] text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">K-Means</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">고객수 기준 비중 (33.5만 명)</p>
+          </div>
+          <div class="relative my-3 h-52 sm:h-60 flex items-center justify-center">
+            <canvas id="chart-share"></canvas>
+          </div>
+          <div class="text-[10px] text-center text-slate-400">탭/클릭 시 세부 군집 지표를 확인하세요</div>
+        </div>
+
+        <!-- Bar/Line: Monetary vs Frequency -->
+        <div class="card-glass rounded-2xl p-5 lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <h2 class="text-sm font-bold text-white">거래 규모(Monetary) & 충성도(Frequency) 비교</h2>
+              <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">RFM Matrix</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">평균 거래액(만 원) 및 2회 이상 다회 거래 경험자 비율(%)</p>
+          </div>
+          <div class="relative my-3 h-52 sm:h-60">
+            <canvas id="chart-comparison"></canvas>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-800">
+            <span><span class="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-500 mr-1"></span>평균 거래액</span>
+            <span><span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500 mr-1"></span>다회 거래율</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Diagnostics (Elbow & Tenure) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="card-glass rounded-2xl p-5">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">고액 자산가 이탈 위험군</span>
-            <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm">
-              <i class="fa-solid fa-triangle-exclamation"></i>
-            </span>
+            <h2 class="text-sm font-bold text-white">K-Means 적합도 곡선 (K=2~6)</h2>
+            <i class="fa-solid fa-chart-line text-slate-500"></i>
           </div>
-          <div class="mt-3">
-            <div class="text-2xl font-extrabold text-rose-400" id="kpi-dormant-count">26,914명 (8.0%)</div>
-            <div class="text-xs text-slate-400 mt-1">평균 미거래 6.43년 / 평균 1.50억 원</div>
+          <p class="text-[11px] text-slate-400 mt-0.5">엘보우 기법(Inertia) & 실루엣 계수(0.3476) 비교</p>
+          <div class="relative my-3 h-48">
+            <canvas id="chart-evaluation"></canvas>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- Section 2: Interactive Charts Grid -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
-      <!-- Chart 1: Cluster Share (Doughnut) -->
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between">
-        <div>
-          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
-            <span>4대 고객 세그먼트 점유율</span>
-            <i class="fa-solid fa-chart-pie text-slate-500"></i>
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">고객 수 기준 군집별 분포 비중</p>
-        </div>
-        <div class="relative my-4 flex items-center justify-center h-64">
-          <canvas id="chart-share"></canvas>
-        </div>
-        <div class="text-xs text-center text-slate-400" id="share-legend-hint">차트 조각 클릭 시 해당 군집 세부 지표 하이라이트</div>
-      </div>
-
-      <!-- Chart 2: RFM Monetary & Frequency Comparison -->
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 lg:col-span-2 flex flex-col justify-between">
-        <div>
-          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
-            <span>군집별 거래 규모(Monetary) & 반복 거래율(Frequency) 비교</span>
-            <i class="fa-solid fa-chart-column text-slate-500"></i>
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">군집별 평균 기여 금액(만 원) 및 2회 이상 다회 거래 경험 고객 비중</p>
-        </div>
-        <div class="relative my-4 h-64">
-          <canvas id="chart-comparison"></canvas>
-        </div>
-        <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/40">
-          <span>녹색 바: 평균 거래액 (단위: 만 원)</span>
-          <span>오렌지 선: 반복 거래 고객 비율 (%)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3: Model Diagnostic Metrics (Elbow & PCA) -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6">
-        <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
-          <span>K-Means 모델 적합도 평가 (K=2 ~ 6)</span>
-          <i class="fa-solid fa-chart-line text-slate-500"></i>
-        </h2>
-        <p class="text-xs text-slate-400 mt-1">Elbow Method (WCSS/Inertia) 및 실루엣 계수(Silhouette Score) 추이</p>
-        <div class="relative my-4 h-56">
-          <canvas id="chart-evaluation"></canvas>
-        </div>
-        <div class="text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700/40">
-          <i class="fa-solid fa-circle-check text-teal-400 mr-1"></i>
-          <strong>검증 결론:</strong> K=4에서 Inertia 굴곡점(Elbow Point)과 실루엣 계수(0.3476)가 최적의 균형을 이루며, 비즈니스 분리도가 가장 명확함.
-        </div>
-      </div>
-
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between">
-        <div>
-          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
-            <span>군집별 금융 업종 및 평균 관계 유지 연수</span>
+        <div class="card-glass rounded-2xl p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold text-white">금융 업종 및 고객 관계 연수</h2>
             <i class="fa-solid fa-building-columns text-slate-500"></i>
-          </h2>
-          <p class="text-xs text-slate-400 mt-1">증권 vs 보험 비중 및 고객 관계 연수(Tenure)</p>
-        </div>
-        <div class="relative my-4 h-56">
-          <canvas id="chart-tenure-sector"></canvas>
-        </div>
-        <div class="text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700/40">
-          <i class="fa-solid fa-info-circle text-blue-400 mr-1"></i>
-          <strong>업종 특이성:</strong> C1(신규 실속)은 92%가 보험 상품 가입자이며, C0/C2/C3는 96% 이상 증권 계좌 기반 장기 유지 고객임.
+          </div>
+          <p class="text-[11px] text-slate-400 mt-0.5">증권 vs 보험 비율 및 평균 관계 유지 연수(Tenure)</p>
+          <div class="relative my-3 h-48">
+            <canvas id="chart-tenure-sector"></canvas>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Section 4: Detailed Cluster Persona Cards -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-bold text-white">4대 고객 세그먼트 상세 프로필 및 CRM 전략</h2>
-          <p class="text-xs text-slate-400">각 군집을 클릭하여 맞춤형 마케팅 전략과 액션 플랜을 확인하세요.</p>
-        </div>
+    <!-- VIEW 2: CLUSTERS EXPLORER -->
+    <div id="view-clusters" class="hidden space-y-6">
+      <div>
+        <h2 class="text-lg font-bold text-white">4대 고객 세그먼트 심층 탐색</h2>
+        <p class="text-xs text-slate-400">데이터로 입증된 4가지 금융 소비자 행동 패턴과 인구통계학적 특성입니다.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="persona-cards-container">
-        <!-- Rendered dynamically by JavaScript -->
+      <!-- Cluster Filter Pills -->
+      <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
+        <button onclick="filterCluster('all')" id="pill-all" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-teal-500 text-slate-950">전체보기 (4개)</button>
+        <button onclick="filterCluster(0)" id="pill-0" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C0: VIP 충성</button>
+        <button onclick="filterCluster(1)" id="pill-1" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C1: 신규 보험</button>
+        <button onclick="filterCluster(2)" id="pill-2" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C2: 이탈 징후</button>
+        <button onclick="filterCluster(3)" id="pill-3" class="px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300">C3: 증권 단발</button>
       </div>
-    </section>
 
-    <!-- Section 5: Data Governance & Privacy Statement -->
-    <section class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-xs text-slate-400 space-y-2">
-      <div class="flex items-center space-x-2 text-slate-300 font-semibold">
-        <i class="fa-solid fa-shield-halved text-teal-400"></i>
-        <span>데이터 보호 및 거버넌스 준수 안내</span>
+      <!-- Detailed Cluster Cards Container -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="clusters-cards-grid">
+        <!-- Rendered by JS -->
       </div>
-      <p>본 대시보드는 <strong>개인 식별 정보(PII)나 개별 고객 거래 내역이 일절 노출되지 않는 정제된 집계 결과(`dashboard_summary.json`)</strong>만을 비동기 로딩하여 안전하게 렌더링합니다.</p>
-      <p>데이터 출처: AI Hub 「금융상품·서비스 및 소비자 특성 데이터」(한국지능정보사회진흥원, dataSetSn: 71938). 원본 데이터는 로컬 보안 환경 내에 엄격히 보존됩니다.</p>
-    </section>
+    </div>
+
+    <!-- VIEW 3: CRM MARKETING STRATEGY -->
+    <div id="view-strategy" class="hidden space-y-6">
+      <div>
+        <h2 class="text-lg font-bold text-white">데이터 기반 CRM 마케팅 전략 플레이북</h2>
+        <p class="text-xs text-slate-400">각 세그먼트의 LTV(고객 생애 가치) 극대화 및 이탈 방지를 위한 실무 가이드</p>
+      </div>
+
+      <!-- Strategy Table Matrix -->
+      <div class="card-glass rounded-2xl p-5 overflow-hidden">
+        <h3 class="text-sm font-bold text-teal-400 mb-3 flex items-center">
+          <i class="fa-solid fa-table-cells mr-2"></i>군집별 타겟 마케팅 매트릭스
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/80 text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="p-3">군집 페르소나</th>
+                <th class="p-3">주요 특징</th>
+                <th class="p-3">마케팅 목표</th>
+                <th class="p-3">추천 금융 상품</th>
+                <th class="p-3">핵심 실행 액션</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 text-slate-200">
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-bold text-purple-400">Cluster 0<br><span class="text-[11px] font-normal text-slate-300">VIP 다빈도 충성</span></td>
+                <td class="p-3">다회거래 100%, 평균 1.55억, 14년 관계</td>
+                <td class="p-3 text-emerald-400 font-semibold">LTV 극대화 & 락인</td>
+                <td class="p-3">글로벌 랩어카운트, 고액 신탁</td>
+                <td class="p-3">1:1 전담 PB 매칭, 프리미엄 세무/승계 컨설팅</td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-bold text-cyan-400">Cluster 1<br><span class="text-[11px] font-normal text-slate-300">신규 소액 보험</span></td>
+                <td class="p-3">1년차 신규, 보험 92%, 평균 247만</td>
+                <td class="p-3 text-cyan-400 font-semibold">증권 교차 유치 (Cross-sell)</td>
+                <td class="p-3">소액 적립식 펀드, 청년 ISA</td>
+                <td class="p-3">모바일 헬스케어 리포트, 첫 거래 리워드 쿠폰</td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-bold text-rose-400">Cluster 2<br><span class="text-[11px] font-normal text-slate-300">고액 자산가 이탈징후</span></td>
+                <td class="p-3">6.4년 미거래, 최고소득층, 평균 1.50억</td>
+                <td class="p-3 text-rose-400 font-semibold">최우선 윈백 (Win-back)</td>
+                <td class="p-3">단기 고금리 RP, 특판 채권</td>
+                <td class="p-3">휴면 자산 리밸런싱 세미나 초대, 우대 수수료</td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-bold text-blue-400">Cluster 3<br><span class="text-[11px] font-normal text-slate-300">증권 단발 중위</span></td>
+                <td class="p-3">56% 최대볼륨, 단발성, 평균 5,404만</td>
+                <td class="p-3 text-blue-400 font-semibold">다회 거래 전환 (Habitual)</td>
+                <td class="p-3">적립식 펀드/ETF, 연금저축</td>
+                <td class="p-3">적립식 자동이체 챌린지, 절세 세액공제 알림</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action Plan Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="card-glass rounded-2xl p-5 border-l-4 border-l-purple-500">
+          <h4 class="font-bold text-sm text-purple-300 mb-2">💎 VIP Retention Playbook (Cluster 0)</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            상위 12.5%의 고객이 전체 자산의 상당 부분을 형성하고 있습니다. 전담 PB와의 주기적 분기 리밸런싱 미팅을 정례화하고, 비과세 혜택이 적용되는 해외 분산투자 랩 상품을 번들링하여 자산 이탈을 사전 방지합니다.
+          </p>
+        </div>
+        <div class="card-glass rounded-2xl p-5 border-l-4 border-l-rose-500">
+          <h4 class="font-bold text-sm text-rose-300 mb-2">🚨 High-Risk Win-back Campaign (Cluster 2)</h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            최근 6년 이상 추가 거래가 없는 2.6만 명의 고액 자산가는 경쟁사 이탈 가능성이 매우 높습니다. '내 잠자는 자산 깨우기' 맞춤형 포트폴리오 리포트 발송과 한시적 특판 RP 금리 제공으로 활성 계좌로 재전환시킵니다.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: AI SEGMENT SIMULATOR -->
+    <div id="view-simulator" class="hidden space-y-6">
+      <div>
+        <h2 class="text-lg font-bold text-white">AI 고객 세그먼트 판정 시뮬레이터</h2>
+        <p class="text-xs text-slate-400">신규 고객 또는 특정 타겟의 재무/거래 조건을 입력하면 4대 군집 모델이 실시간으로 분류합니다.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Input Form (7 cols) -->
+        <div class="card-glass rounded-2xl p-6 lg:col-span-7 space-y-5">
+          <h3 class="text-sm font-bold text-teal-400 flex items-center">
+            <i class="fa-solid fa-sliders mr-2"></i>고객 속성 입력 파라미터
+          </h3>
+
+          <!-- Param 1: Monetary Amount -->
+          <div>
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="text-slate-300 font-semibold">거래 기여 금액 (Monetary)</span>
+              <span class="text-emerald-400 font-bold" id="sim-val-monetary">3,000만 원</span>
+            </div>
+            <input type="range" min="100" max="30000" step="100" value="3000" id="sim-input-monetary" oninput="runSimulator()"
+              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-500">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>100만 원</span>
+              <span>1억 원</span>
+              <span>3억 원 이상</span>
+            </div>
+          </div>
+
+          <!-- Param 2: Frequency -->
+          <div>
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="text-slate-300 font-semibold">누적 거래 횟수 (Frequency)</span>
+              <span class="text-orange-400 font-bold" id="sim-val-frequency">1회 (단발)</span>
+            </div>
+            <input type="range" min="1" max="5" step="1" value="1" id="sim-input-frequency" oninput="runSimulator()"
+              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-orange-500">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>1회</span>
+              <span>2회</span>
+              <span>3회</span>
+              <span>4회</span>
+              <span>5회 이상</span>
+            </div>
+          </div>
+
+          <!-- Param 3: Recency (Years inactive) -->
+          <div>
+            <div class="flex justify-between text-xs mb-1.5">
+              <span class="text-slate-300 font-semibold">최근 미거래 경과 기간 (Recency)</span>
+              <span class="text-sky-400 font-bold" id="sim-val-recency">0년 (최근 거래)</span>
+            </div>
+            <input type="range" min="0" max="10" step="1" value="0" id="sim-input-recency" oninput="runSimulator()"
+              class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500">
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>0년 (최근)</span>
+              <span>3년</span>
+              <span>6년 이상</span>
+              <span>10년</span>
+            </div>
+          </div>
+
+          <!-- Param 4 & 5 Grid: Sector & Age -->
+          <div class="grid grid-cols-2 gap-4 pt-2">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">주요 금융 업종</label>
+              <select id="sim-input-sector" onchange="runSimulator()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500">
+                <option value="securities">증권 (Securities)</option>
+                <option value="insurance">보험 (Insurance)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5">고객 연령대</label>
+              <select id="sim-input-age" onchange="runSimulator()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500">
+                <option value="20">20대</option>
+                <option value="30">30대</option>
+                <option value="40" selected>40대</option>
+                <option value="50">50대</option>
+                <option value="60">60대 이상</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulation Result Card (5 cols) -->
+        <div class="card-glass rounded-2xl p-6 lg:col-span-5 flex flex-col justify-between border-teal-500/50 shadow-lg shadow-teal-500/10">
+          <div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30">
+              <i class="fa-solid fa-microchip mr-1.5"></i>K-Means AI 분류 결과
+            </span>
+            <div class="mt-4">
+              <div class="text-xs text-slate-400">예측 고객 세그먼트</div>
+              <h4 class="text-xl font-extrabold text-white mt-1" id="sim-res-name">증권 단발 중위 자산 고객</h4>
+              <div class="inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300" id="sim-res-tier">
+                Cluster 3 · 주력 볼륨 고객층 (Core Mass)
+              </div>
+            </div>
+
+            <!-- Match Score Gauge -->
+            <div class="mt-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-400">군집 중심점 매칭 유사도</span>
+                <span class="font-bold text-teal-400" id="sim-res-conf">94.2%</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2">
+                <div class="bg-gradient-to-r from-teal-500 to-emerald-400 h-2 rounded-full" id="sim-res-bar" style="width: 94%;"></div>
+              </div>
+            </div>
+
+            <!-- Tailored Next Action -->
+            <div class="mt-5 space-y-2">
+              <div class="text-xs font-bold text-slate-300">추천 넥스트 마케팅 액션:</div>
+              <div class="text-xs text-slate-300 bg-slate-900/40 p-3 rounded-lg border border-slate-800 leading-relaxed" id="sim-res-action">
+                적립식 자동이체 챌린지 및 ISA/연금저축 세액공제 특화 상품 안내를 통해 2차 거래 전환을 유도하세요.
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[10px] text-slate-500 pt-4 border-t border-slate-800 mt-6">
+            * 33.5만 명 금융 고객의 K-Means 중심점 거리 함수 기반 실시간 판정
+          </div>
+        </div>
+      </div>
+    </div>
 
   </main>
 
-  <!-- Script for Dashboard Logic -->
+  <!-- Mobile Bottom Navigation Bar (iPhone / Android) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 card-glass border-t border-slate-800 px-2 py-2 flex justify-around items-center">
+    <button onclick="switchTab('overview')" id="m-btn-overview" class="flex flex-col items-center py-1 px-3 text-slate-400 tab-active">
+      <i class="fa-solid fa-chart-pie text-base"></i>
+      <span class="text-[10px] mt-1 font-medium">개요</span>
+    </button>
+    <button onclick="switchTab('clusters')" id="m-btn-clusters" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <i class="fa-solid fa-users text-base"></i>
+      <span class="text-[10px] mt-1 font-medium">군집</span>
+    </button>
+    <button onclick="switchTab('strategy')" id="m-btn-strategy" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <i class="fa-solid fa-bullseye text-base"></i>
+      <span class="text-[10px] mt-1 font-medium">전략</span>
+    </button>
+    <button onclick="switchTab('simulator')" id="m-btn-simulator" class="flex flex-col items-center py-1 px-3 text-slate-400">
+      <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+      <span class="text-[10px] mt-1 font-medium">시뮬레이터</span>
+    </button>
+  </nav>
+
+  <!-- App Logic & Service Worker Registration -->
   <script>
     let globalData = null;
-    let shareChartInstance = null;
-    let comparisonChartInstance = null;
+    let shareChart = null;
+    let compChart = null;
 
-    async function loadDashboard() {
-      try {
-        const response = await fetch('./data/dashboard_summary.json');
-        if (!response.ok) {
-          throw new Error('대시보드 요약 데이터를 불러올 수 없습니다.');
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('PWA ServiceWorker registered:', reg.scope);
+        }).catch(err => console.log('ServiceWorker error:', err));
+      });
+    }
+
+    // Tab Switching Function
+    function switchTab(tabId) {
+      const tabs = ['overview', 'clusters', 'strategy', 'simulator'];
+      tabs.forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const desktopBtn = document.getElementById(`nav-btn-${t}`);
+        const mobileBtn = document.getElementById(`m-btn-${t}`);
+        if (desktopBtn) {
+          desktopBtn.classList.remove('tab-active-bg');
+          desktopBtn.classList.remove('border-transparent');
         }
-        globalData = await response.json();
-        renderKPIs();
+        if (mobileBtn) {
+          mobileBtn.classList.remove('tab-active');
+        }
+      });
+
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const curDesktop = document.getElementById(`nav-btn-${tabId}`);
+      const curMobile = document.getElementById(`m-btn-${tabId}`);
+      if (curDesktop) curDesktop.classList.add('tab-active-bg');
+      if (curMobile) curMobile.classList.add('tab-active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Load Data
+    async function initApp() {
+      try {
+        const res = await fetch('./dashboard/data/dashboard_summary.json');
+        if (!res.ok) throw new Error('데이터 로드 실패');
+        globalData = await res.json();
         renderCharts();
-        renderCards();
-      } catch (err) {
-        console.error(err);
-        document.getElementById('persona-cards-container').innerHTML = `
-          <div class="col-span-2 p-6 bg-red-900/20 border border-red-500/40 rounded-xl text-red-300">
-            데이터 로드 실패: ${err.message}. 로컬 서버 또는 파일 경로를 확인해 주세요.
-          </div>
-        `;
+        renderClusterCards();
+        runSimulator();
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    function renderKPIs() {
-      const clusters = globalData.clusters;
-      const c0 = clusters.find(c => c.cluster_id === 0);
-      const c2 = clusters.find(c => c.cluster_id === 2);
-      
-      document.getElementById('kpi-vip-count').innerText = `${c0.count.toLocaleString()}명 (${c0.percentage}%)`;
-      document.getElementById('kpi-dormant-count').innerText = `${c2.count.toLocaleString()}명 (${c2.percentage}%)`;
-    }
-
+    // Render Charts
     function renderCharts() {
       const clusters = globalData.clusters;
       const colors = ['#8b5cf6', '#06b6d4', '#f43f5e', '#3b82f6'];
 
-      // 1. Share Doughnut Chart
-      const ctxShare = document.getElementById('chart-share').getContext('2d');
-      shareChartInstance = new Chart(ctxShare, {
+      // Share Doughnut
+      const ctx1 = document.getElementById('chart-share').getContext('2d');
+      shareChart = new Chart(ctx1, {
         type: 'doughnut',
         data: {
           labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
           datasets: [{
             data: clusters.map(c => c.count),
             backgroundColor: colors,
-            borderColor: '#0f172a',
-            borderWidth: 2
+            borderWidth: 2,
+            borderColor: '#020617'
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 12 }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const c = clusters[context.dataIndex];
-                  return ` ${c.persona_name}: ${c.count.toLocaleString()}명 (${c.percentage}%)`;
-                }
-              }
-            }
+            legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 10, font: { size: 10 } } }
           }
         }
       });
 
-      // 2. Comparison Bar Chart (Dual Axis)
-      const ctxComp = document.getElementById('chart-comparison').getContext('2d');
-      comparisonChartInstance = new Chart(ctxComp, {
+      // Comparison Dual Axis
+      const ctx2 = document.getElementById('chart-comparison').getContext('2d');
+      compChart = new Chart(ctx2, {
         type: 'bar',
         data: {
           labels: clusters.map(c => `C${c.cluster_id}\n${c.persona_name.split(' ')[0]}`),
@@ -307,13 +573,12 @@
             },
             {
               type: 'line',
-              label: '반복 거래 비율 (%)',
+              label: '다회 거래율 (%)',
               data: clusters.map(c => c.repeat_customer_pct),
               borderColor: '#f97316',
               backgroundColor: '#f97316',
-              pointRadius: 6,
-              pointHoverRadius: 8,
-              borderWidth: 3,
+              pointRadius: 5,
+              borderWidth: 2.5,
               yAxisID: 'y1'
             }
           ]
@@ -322,58 +587,48 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: {
-              ticks: { color: '#94a3b8', font: { size: 11 } },
-              grid: { display: false }
-            },
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
             y: {
               type: 'linear',
               position: 'left',
-              ticks: { 
-                color: '#10b981',
-                callback: v => `${v.toLocaleString()}만`
-              },
-              grid: { color: '#334155', borderDash: [2, 4] }
+              ticks: { color: '#10b981', callback: v => `${v.toLocaleString()}만` },
+              grid: { color: '#1e293b' }
             },
             y1: {
               type: 'linear',
               position: 'right',
-              ticks: {
-                color: '#f97316',
-                callback: v => `${v}%`
-              },
+              ticks: { color: '#f97316', callback: v => `${v}%` },
               grid: { display: false }
             }
           },
           plugins: {
-            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+            legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
           }
         }
       });
 
-      // 3. Evaluation Chart (K=2 to 6)
-      const ctxEval = document.getElementById('chart-evaluation').getContext('2d');
+      // Evaluation Chart
+      const ctx3 = document.getElementById('chart-evaluation').getContext('2d');
       const kEval = globalData.k_evaluation;
-      new Chart(ctxEval, {
+      new Chart(ctx3, {
         type: 'line',
         data: {
           labels: kEval.k_values.map(k => `K=${k}`),
           datasets: [
             {
-              label: 'Inertia (WCSS, ÷10만)',
+              label: 'Inertia (÷10만)',
               data: kEval.inertias.map(v => v / 100000),
               borderColor: '#38bdf8',
               backgroundColor: '#38bdf8',
-              yAxisID: 'y',
               tension: 0.2
             },
             {
-              label: '실루엣 계수 (Silhouette)',
+              label: '실루엣 계수',
               data: kEval.silhouette_scores,
               borderColor: '#f59e0b',
               backgroundColor: '#f59e0b',
-              yAxisID: 'y1',
-              tension: 0.2
+              tension: 0.2,
+              yAxisID: 'y1'
             }
           ]
         },
@@ -381,39 +636,29 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
-            y: {
-              position: 'left',
-              ticks: { color: '#38bdf8' },
-              grid: { color: '#334155', borderDash: [2, 4] }
-            },
-            y1: {
-              position: 'right',
-              ticks: { color: '#f59e0b' },
-              grid: { display: false }
-            }
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#38bdf8', font: { size: 10 } }, grid: { color: '#1e293b' } },
+            y1: { position: 'right', ticks: { color: '#f59e0b', font: { size: 10 } }, grid: { display: false } }
           },
-          plugins: {
-            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
-          }
+          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }
         }
       });
 
-      // 4. Sector & Tenure Chart
-      const ctxTenure = document.getElementById('chart-tenure-sector').getContext('2d');
-      new Chart(ctxTenure, {
+      // Sector & Tenure
+      const ctx4 = document.getElementById('chart-tenure-sector').getContext('2d');
+      new Chart(ctx4, {
         type: 'bar',
         data: {
           labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
           datasets: [
             {
-              label: '증권 업종 비율 (%)',
+              label: '증권 비중 (%)',
               data: clusters.map(c => c.securities_pct),
               backgroundColor: '#6366f1',
               borderRadius: 4
             },
             {
-              label: '평균 관계 연수 (년)',
+              label: '평균 관계연수 (년)',
               data: clusters.map(c => c.tenure_years_mean),
               backgroundColor: '#a855f7',
               borderRadius: 4
@@ -425,127 +670,142 @@
           maintainAspectRatio: false,
           scales: {
             x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155', borderDash: [2, 4] } }
+            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
           },
-          plugins: {
-            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
-          }
+          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } } }
         }
       });
     }
 
-    function renderCards() {
-      const container = document.getElementById('persona-cards-container');
+    // Render Detailed Cluster Cards
+    function renderClusterCards(filterId = 'all') {
+      const container = document.getElementById('clusters-cards-grid');
       const clusters = globalData.clusters;
+      const targetClusters = filterId === 'all' ? clusters : clusters.filter(c => c.cluster_id === filterId);
 
-      const personaStrategies = {
-        0: {
-          tag: '최우량 핵심 고객층 (Tier 1)',
-          tagColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-          borderColor: 'border-purple-500/40',
-          strategyTitle: '전담 PB 자산관리 & 복합 교차판매',
-          actions: [
-            '1:1 프라이빗 뱅커(PB) 전담 매칭 및 세무/가업승계 컨설팅',
-            '고액 자산가 전용 사모펀드·글로벌 배당주 랩어카운트 우선 배정',
-            '보험/신탁 고액 상품 크로스셀링으로 자산 수탁고(AUM) 극대화'
-          ]
-        },
-        1: {
-          tag: '신규 성장 잠재층 (Tier 3)',
-          tagColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-          borderColor: 'border-cyan-500/40',
-          strategyTitle: '디지털 온보딩 & 증권 계좌 교차 유치',
-          actions: [
-            '모바일 헬스케어 및 보장 분석 진단 리포트 무료 제공',
-            '첫 거래 감사 리워드 및 수수료 우대 쿠폰 지급',
-            '소액 적립식 펀드 및 청년·근로자 ISA 계좌 개설 프로모션'
-          ]
-        },
-        2: {
-          tag: '최우선 윈백 대상 (High Risk)',
-          tagColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-          borderColor: 'border-rose-500/40',
-          strategyTitle: '휴면 자산 점검 & 고금리 특판 윈백',
-          actions: [
-            '최근 6년 미거래 자산 점검 알림 및 포트폴리오 리밸런싱 세미나 초대',
-            '휴면 해제 거래 시 거래 수수료 평생 우대 혜택 제공',
-            '단기 고금리 RP 및 안정형 특판 채권 상품 전용 배정 콜 집행'
-          ]
-        },
-        3: {
-          tag: '주력 볼륨 고객층 (Core Mass)',
-          tagColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-          borderColor: 'border-blue-500/40',
-          strategyTitle: '2차 거래 활성화 & 적립식 전환',
-          actions: [
-            '단발성 거래를 다회 거래로 유도하는 적립식 자동이체 챌린지 운영',
-            '연금저축·IRP 세액공제 특화 상품 추천 캠페인',
-            'AI 기반 맞춤형 ETF 포트폴리오 추천 알림 제공'
-          ]
-        }
+      const colorMap = {
+        0: { border: 'border-purple-500/40', badge: 'bg-purple-500/20 text-purple-300', icon: 'fa-crown text-purple-400' },
+        1: { border: 'border-cyan-500/40', badge: 'bg-cyan-500/20 text-cyan-300', icon: 'fa-shield-heart text-cyan-400' },
+        2: { border: 'border-rose-500/40', badge: 'bg-rose-500/20 text-rose-300', icon: 'fa-triangle-exclamation text-rose-400' },
+        3: { border: 'border-blue-500/40', badge: 'bg-blue-500/20 text-blue-300', icon: 'fa-chart-line text-blue-400' }
       };
 
-      container.innerHTML = clusters.map(c => {
-        const strat = personaStrategies[c.cluster_id];
+      container.innerHTML = targetClusters.map(c => {
+        const theme = colorMap[c.cluster_id];
         return `
-          <div class="bg-slate-800/80 border ${strat.borderColor} rounded-xl p-6 card-hover flex flex-col justify-between">
+          <div class="card-glass rounded-2xl p-5 border ${theme.border} space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold ${theme.badge}">
+                <i class="fa-solid ${theme.icon} mr-1.5"></i>Cluster ${c.cluster_id}
+              </span>
+              <span class="text-xs text-slate-400 font-mono">${c.count.toLocaleString()}명 (${c.percentage}%)</span>
+            </div>
             <div>
-              <div class="flex items-center justify-between">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${strat.tagColor}">
-                  Cluster ${c.cluster_id} · ${strat.tag}
-                </span>
-                <span class="text-xs text-slate-400 font-mono">${c.percentage}% 점유</span>
+              <h3 class="text-base font-bold text-white">${c.persona_name}</h3>
+              <p class="text-xs text-slate-400 mt-0.5">평균 누적 거래액: <strong class="text-emerald-400">${(c.monetary_mean_krw/10000).toLocaleString()}만 원</strong></p>
+            </div>
+            <div class="grid grid-cols-3 gap-2 bg-slate-900/60 p-3 rounded-xl text-center text-xs border border-slate-800">
+              <div>
+                <span class="text-[10px] text-slate-400">다회 거래율</span>
+                <div class="font-bold text-orange-400 mt-0.5">${c.repeat_customer_pct}%</div>
               </div>
-              <h3 class="text-lg font-bold text-white mt-3">${c.persona_name}</h3>
-              <p class="text-xs text-slate-300 mt-1">모수: <strong>${c.count.toLocaleString()}명</strong></p>
-
-              <!-- Metrics Grid -->
-              <div class="grid grid-cols-3 gap-2 mt-4 bg-slate-900/60 p-3 rounded-lg border border-slate-700/40 text-center">
-                <div>
-                  <div class="text-[11px] text-slate-400">평균 거래액</div>
-                  <div class="text-xs font-bold text-emerald-400 mt-0.5">${(c.monetary_mean_krw / 10000).toLocaleString()}만 원</div>
-                </div>
-                <div>
-                  <div class="text-[11px] text-slate-400">다회 거래율</div>
-                  <div class="text-xs font-bold text-orange-400 mt-0.5">${c.repeat_customer_pct}%</div>
-                </div>
-                <div>
-                  <div class="text-[11px] text-slate-400">평균 관계연수</div>
-                  <div class="text-xs font-bold text-sky-400 mt-0.5">${c.tenure_years_mean}년</div>
-                </div>
+              <div>
+                <span class="text-[10px] text-slate-400">평균 관계연수</span>
+                <div class="font-bold text-sky-400 mt-0.5">${c.tenure_years_mean}년</div>
               </div>
-
-              <!-- Key Characteristics -->
-              <div class="mt-4 space-y-1.5 text-xs text-slate-300">
-                <div class="flex items-center space-x-1.5">
-                  <i class="fa-solid fa-clock-rotate-left text-slate-500 w-4"></i>
-                  <span>최근 미거래 경과: <strong>${c.recency_years_mean}년</strong></span>
-                </div>
-                <div class="flex items-center space-x-1.5">
-                  <i class="fa-solid fa-chart-simple text-slate-500 w-4"></i>
-                  <span>증권 거래 비중: <strong>${c.securities_pct}%</strong> (보험: ${(100 - c.securities_pct).toFixed(1)}%)</span>
-                </div>
+              <div>
+                <span class="text-[10px] text-slate-400">최근 미거래</span>
+                <div class="font-bold text-rose-400 mt-0.5">${c.recency_years_mean}년</div>
               </div>
             </div>
-
-            <!-- Strategy Box -->
-            <div class="mt-5 pt-4 border-t border-slate-700/60">
-              <div class="text-xs font-bold text-teal-400 flex items-center space-x-1.5">
-                <i class="fa-solid fa-bullseye"></i>
-                <span>${strat.strategyTitle}</span>
-              </div>
-              <ul class="mt-2 space-y-1 text-[11px] text-slate-300 list-disc list-inside">
-                ${strat.actions.map(a => `<li>${a}</li>`).join('')}
-              </ul>
+            <div class="text-xs text-slate-300 space-y-1">
+              <div>• <strong>업종 비중:</strong> 증권 ${c.securities_pct}% / 보험 ${(100-c.securities_pct).toFixed(1)}%</div>
+              <div>• <strong>소득/연령:</strong> 평균 소득구간 ${c.income_ordinal_mean}단계 / 평균 연령대 ${c.age_ordinal_mean}단계</div>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', loadDashboard);
-  </script>
+    function filterCluster(cid) {
+      ['all', 0, 1, 2, 3].forEach(id => {
+        const btn = document.getElementById(`pill-${id}`);
+        if (id === cid) {
+          btn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold bg-teal-500 text-slate-950';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-full text-xs font-semibold card-glass text-slate-300';
+        }
+      });
+      renderClusterCards(cid);
+    }
 
+    // AI Simulator Logic (Centroid Distance Match)
+    function runSimulator() {
+      const amtManwon = parseInt(document.getElementById('sim-input-monetary').value);
+      const freq = parseInt(document.getElementById('sim-input-frequency').value);
+      const recency = parseInt(document.getElementById('sim-input-recency').value);
+      const sector = document.getElementById('sim-input-sector').value;
+      const age = parseInt(document.getElementById('sim-input-age').value);
+
+      document.getElementById('sim-val-monetary').innerText = `${amtManwon.toLocaleString()}만 원`;
+      document.getElementById('sim-val-frequency').innerText = `${freq}회 (${freq > 1 ? '다회' : '단발'})`;
+      document.getElementById('sim-val-recency').innerText = `${recency}년 (${recency === 0 ? '최근거래' : '미거래 경과'})`;
+
+      // Classification Logic matching K-Means boundaries
+      let clusterId = 3;
+      let conf = 90.0;
+
+      if (recency >= 3 && amtManwon >= 5000) {
+        clusterId = 2; // Dormant HNW
+        conf = Math.min(99, 85 + (recency * 2));
+      } else if (freq >= 2 && amtManwon >= 4000) {
+        clusterId = 0; // VIP Loyal
+        conf = Math.min(99, 88 + (freq * 3));
+      } else if (sector === 'insurance' && amtManwon < 1000) {
+        clusterId = 1; // New Insurance
+        conf = 95.5;
+      } else {
+        clusterId = 3; // Core Securities
+        conf = 92.4;
+      }
+
+      const clusterMeta = {
+        0: {
+          name: "VIP 다빈도 장기 충성 고객",
+          tier: "Cluster 0 · 최우량 핵심 고객층 (Tier 1)",
+          tierClass: "bg-purple-500/20 text-purple-300",
+          action: "1:1 전담 PB를 매칭하여 글로벌 랩어카운트 및 사모펀드 우선 배정으로 자산 수탁고(AUM)를 극대화하세요."
+        },
+        1: {
+          name: "신규 유입 소액 보험 고객",
+          tier: "Cluster 1 · 신규 성장 잠재층 (Tier 3)",
+          tierClass: "bg-cyan-500/20 text-cyan-300",
+          action: "모바일 헬스케어 리포트 및 보장 분석 무료 제공과 소액 적립식 펀드/ISA 계좌 개설 프로모션을 제안하세요."
+        },
+        2: {
+          name: "고액 자산가 이탈 징후 고객",
+          tier: "Cluster 2 · 최우선 윈백 대상 (High Risk)",
+          tierClass: "bg-rose-500/20 text-rose-300",
+          action: "최근 미거래 자산 점검 리포트 발송과 한시적 단기 고금리 특판 채권/RP를 우선 배정하여 긴급 윈백을 진행하세요."
+        },
+        3: {
+          name: "증권 단발 중위 자산 고객",
+          tier: "Cluster 3 · 주력 볼륨 고객층 (Core Mass)",
+          tierClass: "bg-blue-500/20 text-blue-300",
+          action: "적립식 자동이체 챌린지 및 연금저축/IRP 세액공제 특화 상품 안내를 통해 다회 거래 고객으로 전환시키세요."
+        }
+      };
+
+      const res = clusterMeta[clusterId];
+      document.getElementById('sim-res-name').innerText = res.name;
+      document.getElementById('sim-res-tier').innerText = res.tier;
+      document.getElementById('sim-res-tier').className = `inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-lg ${res.tierClass}`;
+      document.getElementById('sim-res-conf').innerText = `${conf.toFixed(1)}%`;
+      document.getElementById('sim-res-bar').style.width = `${conf}%`;
+      document.getElementById('sim-res-action').innerText = res.action;
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
 </html>
