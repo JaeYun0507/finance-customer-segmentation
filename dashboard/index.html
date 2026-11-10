@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Customer Segmentation Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#0d9488',
+              600: '#0f766e',
+              900: '#134e4a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .card-hover:hover { transform: translateY(-2px); transition: all 0.2s ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xl">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-white leading-tight">Finance Customer Segmentation</h1>
+          <p class="text-xs text-slate-400">AI Hub 금융상품·소비자 특성 기반 RFM & K-Means 인텔리전스</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+          K-Means K=4 최적화 완료
+        </span>
+        <span class="text-xs text-slate-400 hidden sm:inline">데이터 기준 연도: 2025</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Section 1: KPI Overview Cards -->
+    <section>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- KPI 1 -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">총 분석 고객 수</span>
+            <span class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-users"></i>
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-2xl font-extrabold text-white" id="kpi-total-cust">335,506명</div>
+            <div class="text-xs text-slate-400 mt-1">원천 거래 내역 385,019건 집계</div>
+          </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">고객 평균 누적 거래액</span>
+            <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-won-sign"></i>
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-2xl font-extrabold text-emerald-400" id="kpi-avg-monetary">6,246만 원</div>
+            <div class="text-xs text-slate-400 mt-1">중앙값: 1,000만 원 (최대 160억 원)</div>
+          </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">VIP 충성 고객 비중</span>
+            <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-crown"></i>
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-2xl font-extrabold text-purple-400" id="kpi-vip-count">41,815명 (12.5%)</div>
+            <div class="text-xs text-slate-400 mt-1">다회 거래율 100% / 평균 1.55억 원</div>
+          </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 card-hover">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">고액 자산가 이탈 위험군</span>
+            <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </span>
+          </div>
+          <div class="mt-3">
+            <div class="text-2xl font-extrabold text-rose-400" id="kpi-dormant-count">26,914명 (8.0%)</div>
+            <div class="text-xs text-slate-400 mt-1">평균 미거래 6.43년 / 평균 1.50억 원</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Interactive Charts Grid -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Chart 1: Cluster Share (Doughnut) -->
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
+            <span>4대 고객 세그먼트 점유율</span>
+            <i class="fa-solid fa-chart-pie text-slate-500"></i>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">고객 수 기준 군집별 분포 비중</p>
+        </div>
+        <div class="relative my-4 flex items-center justify-center h-64">
+          <canvas id="chart-share"></canvas>
+        </div>
+        <div class="text-xs text-center text-slate-400" id="share-legend-hint">차트 조각 클릭 시 해당 군집 세부 지표 하이라이트</div>
+      </div>
+
+      <!-- Chart 2: RFM Monetary & Frequency Comparison -->
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 lg:col-span-2 flex flex-col justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
+            <span>군집별 거래 규모(Monetary) & 반복 거래율(Frequency) 비교</span>
+            <i class="fa-solid fa-chart-column text-slate-500"></i>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">군집별 평균 기여 금액(만 원) 및 2회 이상 다회 거래 경험 고객 비중</p>
+        </div>
+        <div class="relative my-4 h-64">
+          <canvas id="chart-comparison"></canvas>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-700/40">
+          <span>녹색 바: 평균 거래액 (단위: 만 원)</span>
+          <span>오렌지 선: 반복 거래 고객 비율 (%)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Model Diagnostic Metrics (Elbow & PCA) -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6">
+        <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
+          <span>K-Means 모델 적합도 평가 (K=2 ~ 6)</span>
+          <i class="fa-solid fa-chart-line text-slate-500"></i>
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">Elbow Method (WCSS/Inertia) 및 실루엣 계수(Silhouette Score) 추이</p>
+        <div class="relative my-4 h-56">
+          <canvas id="chart-evaluation"></canvas>
+        </div>
+        <div class="text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700/40">
+          <i class="fa-solid fa-circle-check text-teal-400 mr-1"></i>
+          <strong>검증 결론:</strong> K=4에서 Inertia 굴곡점(Elbow Point)과 실루엣 계수(0.3476)가 최적의 균형을 이루며, 비즈니스 분리도가 가장 명확함.
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between">
+        <div>
+          <h2 class="text-sm font-semibold text-slate-200 flex items-center justify-between">
+            <span>군집별 금융 업종 및 평균 관계 유지 연수</span>
+            <i class="fa-solid fa-building-columns text-slate-500"></i>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">증권 vs 보험 비중 및 고객 관계 연수(Tenure)</p>
+        </div>
+        <div class="relative my-4 h-56">
+          <canvas id="chart-tenure-sector"></canvas>
+        </div>
+        <div class="text-xs text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-700/40">
+          <i class="fa-solid fa-info-circle text-blue-400 mr-1"></i>
+          <strong>업종 특이성:</strong> C1(신규 실속)은 92%가 보험 상품 가입자이며, C0/C2/C3는 96% 이상 증권 계좌 기반 장기 유지 고객임.
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Detailed Cluster Persona Cards -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white">4대 고객 세그먼트 상세 프로필 및 CRM 전략</h2>
+          <p class="text-xs text-slate-400">각 군집을 클릭하여 맞춤형 마케팅 전략과 액션 플랜을 확인하세요.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="persona-cards-container">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Section 5: Data Governance & Privacy Statement -->
+    <section class="bg-slate-900 border border-slate-800 rounded-xl p-6 text-xs text-slate-400 space-y-2">
+      <div class="flex items-center space-x-2 text-slate-300 font-semibold">
+        <i class="fa-solid fa-shield-halved text-teal-400"></i>
+        <span>데이터 보호 및 거버넌스 준수 안내</span>
+      </div>
+      <p>본 대시보드는 <strong>개인 식별 정보(PII)나 개별 고객 거래 내역이 일절 노출되지 않는 정제된 집계 결과(`dashboard_summary.json`)</strong>만을 비동기 로딩하여 안전하게 렌더링합니다.</p>
+      <p>데이터 출처: AI Hub 「금융상품·서비스 및 소비자 특성 데이터」(한국지능정보사회진흥원, dataSetSn: 71938). 원본 데이터는 로컬 보안 환경 내에 엄격히 보존됩니다.</p>
+    </section>
+
+  </main>
+
+  <!-- Script for Dashboard Logic -->
+  <script>
+    let globalData = null;
+    let shareChartInstance = null;
+    let comparisonChartInstance = null;
+
+    async function loadDashboard() {
+      try {
+        const response = await fetch('./data/dashboard_summary.json');
+        if (!response.ok) {
+          throw new Error('대시보드 요약 데이터를 불러올 수 없습니다.');
+        }
+        globalData = await response.json();
+        renderKPIs();
+        renderCharts();
+        renderCards();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('persona-cards-container').innerHTML = `
+          <div class="col-span-2 p-6 bg-red-900/20 border border-red-500/40 rounded-xl text-red-300">
+            데이터 로드 실패: ${err.message}. 로컬 서버 또는 파일 경로를 확인해 주세요.
+          </div>
+        `;
+      }
+    }
+
+    function renderKPIs() {
+      const clusters = globalData.clusters;
+      const c0 = clusters.find(c => c.cluster_id === 0);
+      const c2 = clusters.find(c => c.cluster_id === 2);
+      
+      document.getElementById('kpi-vip-count').innerText = `${c0.count.toLocaleString()}명 (${c0.percentage}%)`;
+      document.getElementById('kpi-dormant-count').innerText = `${c2.count.toLocaleString()}명 (${c2.percentage}%)`;
+    }
+
+    function renderCharts() {
+      const clusters = globalData.clusters;
+      const colors = ['#8b5cf6', '#06b6d4', '#f43f5e', '#3b82f6'];
+
+      // 1. Share Doughnut Chart
+      const ctxShare = document.getElementById('chart-share').getContext('2d');
+      shareChartInstance = new Chart(ctxShare, {
+        type: 'doughnut',
+        data: {
+          labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
+          datasets: [{
+            data: clusters.map(c => c.count),
+            backgroundColor: colors,
+            borderColor: '#0f172a',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const c = clusters[context.dataIndex];
+                  return ` ${c.persona_name}: ${c.count.toLocaleString()}명 (${c.percentage}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // 2. Comparison Bar Chart (Dual Axis)
+      const ctxComp = document.getElementById('chart-comparison').getContext('2d');
+      comparisonChartInstance = new Chart(ctxComp, {
+        type: 'bar',
+        data: {
+          labels: clusters.map(c => `C${c.cluster_id}\n${c.persona_name.split(' ')[0]}`),
+          datasets: [
+            {
+              type: 'bar',
+              label: '평균 거래액 (만 원)',
+              data: clusters.map(c => Math.round(c.monetary_mean_krw / 10000)),
+              backgroundColor: '#10b981',
+              borderRadius: 6,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: '반복 거래 비율 (%)',
+              data: clusters.map(c => c.repeat_customer_pct),
+              borderColor: '#f97316',
+              backgroundColor: '#f97316',
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              borderWidth: 3,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color: '#94a3b8', font: { size: 11 } },
+              grid: { display: false }
+            },
+            y: {
+              type: 'linear',
+              position: 'left',
+              ticks: { 
+                color: '#10b981',
+                callback: v => `${v.toLocaleString()}만`
+              },
+              grid: { color: '#334155', borderDash: [2, 4] }
+            },
+            y1: {
+              type: 'linear',
+              position: 'right',
+              ticks: {
+                color: '#f97316',
+                callback: v => `${v}%`
+              },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+          }
+        }
+      });
+
+      // 3. Evaluation Chart (K=2 to 6)
+      const ctxEval = document.getElementById('chart-evaluation').getContext('2d');
+      const kEval = globalData.k_evaluation;
+      new Chart(ctxEval, {
+        type: 'line',
+        data: {
+          labels: kEval.k_values.map(k => `K=${k}`),
+          datasets: [
+            {
+              label: 'Inertia (WCSS, ÷10만)',
+              data: kEval.inertias.map(v => v / 100000),
+              borderColor: '#38bdf8',
+              backgroundColor: '#38bdf8',
+              yAxisID: 'y',
+              tension: 0.2
+            },
+            {
+              label: '실루엣 계수 (Silhouette)',
+              data: kEval.silhouette_scores,
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b',
+              yAxisID: 'y1',
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+            y: {
+              position: 'left',
+              ticks: { color: '#38bdf8' },
+              grid: { color: '#334155', borderDash: [2, 4] }
+            },
+            y1: {
+              position: 'right',
+              ticks: { color: '#f59e0b' },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+          }
+        }
+      });
+
+      // 4. Sector & Tenure Chart
+      const ctxTenure = document.getElementById('chart-tenure-sector').getContext('2d');
+      new Chart(ctxTenure, {
+        type: 'bar',
+        data: {
+          labels: clusters.map(c => `C${c.cluster_id}: ${c.persona_name.split(' ')[0]}`),
+          datasets: [
+            {
+              label: '증권 업종 비율 (%)',
+              data: clusters.map(c => c.securities_pct),
+              backgroundColor: '#6366f1',
+              borderRadius: 4
+            },
+            {
+              label: '평균 관계 연수 (년)',
+              data: clusters.map(c => c.tenure_years_mean),
+              backgroundColor: '#a855f7',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155', borderDash: [2, 4] } }
+          },
+          plugins: {
+            legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    function renderCards() {
+      const container = document.getElementById('persona-cards-container');
+      const clusters = globalData.clusters;
+
+      const personaStrategies = {
+        0: {
+          tag: '최우량 핵심 고객층 (Tier 1)',
+          tagColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+          borderColor: 'border-purple-500/40',
+          strategyTitle: '전담 PB 자산관리 & 복합 교차판매',
+          actions: [
+            '1:1 프라이빗 뱅커(PB) 전담 매칭 및 세무/가업승계 컨설팅',
+            '고액 자산가 전용 사모펀드·글로벌 배당주 랩어카운트 우선 배정',
+            '보험/신탁 고액 상품 크로스셀링으로 자산 수탁고(AUM) 극대화'
+          ]
+        },
+        1: {
+          tag: '신규 성장 잠재층 (Tier 3)',
+          tagColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+          borderColor: 'border-cyan-500/40',
+          strategyTitle: '디지털 온보딩 & 증권 계좌 교차 유치',
+          actions: [
+            '모바일 헬스케어 및 보장 분석 진단 리포트 무료 제공',
+            '첫 거래 감사 리워드 및 수수료 우대 쿠폰 지급',
+            '소액 적립식 펀드 및 청년·근로자 ISA 계좌 개설 프로모션'
+          ]
+        },
+        2: {
+          tag: '최우선 윈백 대상 (High Risk)',
+          tagColor: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+          borderColor: 'border-rose-500/40',
+          strategyTitle: '휴면 자산 점검 & 고금리 특판 윈백',
+          actions: [
+            '최근 6년 미거래 자산 점검 알림 및 포트폴리오 리밸런싱 세미나 초대',
+            '휴면 해제 거래 시 거래 수수료 평생 우대 혜택 제공',
+            '단기 고금리 RP 및 안정형 특판 채권 상품 전용 배정 콜 집행'
+          ]
+        },
+        3: {
+          tag: '주력 볼륨 고객층 (Core Mass)',
+          tagColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+          borderColor: 'border-blue-500/40',
+          strategyTitle: '2차 거래 활성화 & 적립식 전환',
+          actions: [
+            '단발성 거래를 다회 거래로 유도하는 적립식 자동이체 챌린지 운영',
+            '연금저축·IRP 세액공제 특화 상품 추천 캠페인',
+            'AI 기반 맞춤형 ETF 포트폴리오 추천 알림 제공'
+          ]
+        }
+      };
+
+      container.innerHTML = clusters.map(c => {
+        const strat = personaStrategies[c.cluster_id];
+        return `
+          <div class="bg-slate-800/80 border ${strat.borderColor} rounded-xl p-6 card-hover flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${strat.tagColor}">
+                  Cluster ${c.cluster_id} · ${strat.tag}
+                </span>
+                <span class="text-xs text-slate-400 font-mono">${c.percentage}% 점유</span>
+              </div>
+              <h3 class="text-lg font-bold text-white mt-3">${c.persona_name}</h3>
+              <p class="text-xs text-slate-300 mt-1">모수: <strong>${c.count.toLocaleString()}명</strong></p>
+
+              <!-- Metrics Grid -->
+              <div class="grid grid-cols-3 gap-2 mt-4 bg-slate-900/60 p-3 rounded-lg border border-slate-700/40 text-center">
+                <div>
+                  <div class="text-[11px] text-slate-400">평균 거래액</div>
+                  <div class="text-xs font-bold text-emerald-400 mt-0.5">${(c.monetary_mean_krw / 10000).toLocaleString()}만 원</div>
+                </div>
+                <div>
+                  <div class="text-[11px] text-slate-400">다회 거래율</div>
+                  <div class="text-xs font-bold text-orange-400 mt-0.5">${c.repeat_customer_pct}%</div>
+                </div>
+                <div>
+                  <div class="text-[11px] text-slate-400">평균 관계연수</div>
+                  <div class="text-xs font-bold text-sky-400 mt-0.5">${c.tenure_years_mean}년</div>
+                </div>
+              </div>
+
+              <!-- Key Characteristics -->
+              <div class="mt-4 space-y-1.5 text-xs text-slate-300">
+                <div class="flex items-center space-x-1.5">
+                  <i class="fa-solid fa-clock-rotate-left text-slate-500 w-4"></i>
+                  <span>최근 미거래 경과: <strong>${c.recency_years_mean}년</strong></span>
+                </div>
+                <div class="flex items-center space-x-1.5">
+                  <i class="fa-solid fa-chart-simple text-slate-500 w-4"></i>
+                  <span>증권 거래 비중: <strong>${c.securities_pct}%</strong> (보험: ${(100 - c.securities_pct).toFixed(1)}%)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Strategy Box -->
+            <div class="mt-5 pt-4 border-t border-slate-700/60">
+              <div class="text-xs font-bold text-teal-400 flex items-center space-x-1.5">
+                <i class="fa-solid fa-bullseye"></i>
+                <span>${strat.strategyTitle}</span>
+              </div>
+              <ul class="mt-2 space-y-1 text-[11px] text-slate-300 list-disc list-inside">
+                ${strat.actions.map(a => `<li>${a}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+# Data files
+data/
+*.csv
+*.zip
+*.parquet
+
+# Python & Virtualenv
+.venv/
+__pycache__/
+*.pyc
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Antigravity & Scratch
+scratch/
+.gemini/
